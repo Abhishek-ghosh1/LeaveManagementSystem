@@ -1,0 +1,115 @@
+﻿@model Leave_Management_System.Models.LeaveMatrix
+
+@{
+    ViewData["Title"] = "Leave Matrix";
+}
+
+<div class="container">
+    <div class="card">
+
+        <div class="card-header bg-primary text-center">
+            <h4 class="m-0 text-white">Leave Matrix / Create</h4>
+        </div>
+
+        <div class="card-body">
+        <form id="createMatrixForm" asp-action="Create">
+
+                <div class="form-group">
+
+                    <input type="text" class="form-control" value="@ViewBag.Name" readonly />
+                    <input type="hidden" asp-for="RoleMasterId"  value="@ViewBag.RoleMasterId" readonly />
+
+                    <label>Level</label>
+
+                    <!-- Visible but not editable -->
+                    <input type="text" class="form-control" value="@ViewBag.NextLevel" readonly />
+
+                    <!-- Actual value sent to server -->
+                    <input type="hidden" asp-for="Level" value="@ViewBag.NextLevel" />
+                </div>
+
+            <!-- Role Dropdown Field -->
+            <div class="form-group">
+                <label for="ToRole" class="control-label required">Role</label>
+                <select asp-for="ToRole" class="form-control req select2" asp-items="ViewBag.Roles" id="RolesDropdown" required>
+                    <option value="">-- Select a Role --</option>
+                </select>
+                <span asp-validation-for="ToRole" class="text-danger"></span>
+            </div>
+        
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary btn-block" />
+            </div>
+        </form>
+        </div>
+
+        <div class="card-footer">
+            <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+
+
+    <script>
+        $(document).ready(function () {
+           
+
+            $('.select2').select2({
+            width: '100%'
+        });
+          
+            $('#createMatrixForm').on('submit', function (e) {
+                e.preventDefault();
+
+                 if (!$('#createMatrixForm').length) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Form Error',
+                            text: 'The form is not properly initialized. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                 }
+
+                $('#modal-loader').modal('show');
+                var $form = $(this);
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Create", "LeaveMatrix")',
+                    data: $form.serialize(),
+                    success: function (response) {
+                        $('#modal-loader').modal('hide');
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.href = '/LeaveMatrix/Index?id=' + response.id;
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'An error occurred while creating the Leave Matrix.',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    },
+                    error: function () {
+                        $('#modal-loader').modal('hide');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'An error occurred. Please try again later.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

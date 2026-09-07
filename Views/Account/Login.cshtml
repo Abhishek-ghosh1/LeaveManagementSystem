@@ -1,0 +1,157 @@
+@model Leave_Management_System.Models.Login
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Leave Management System</title>
+    
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- AdminLTE Theme style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    
+    <style>
+        body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .login-container {
+            height: 100vh;
+        }
+        .login-image {
+            height: 100vh;
+            overflow: hidden;
+        }
+        .login-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+        .login-form-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-logo {
+            font-weight: 300;
+            font-size: 2.1rem;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .login-box-msg {
+            margin: 0;
+            text-align: center;
+            padding: 0 20px 20px;
+        }
+    </style>
+</head>
+
+    @* Width: 1344 pixels (70% of 1920px standard screen)
+    Height: 1080 pixels (100% of standard screen height)
+ *@
+
+<body class="hold-transition login-page">
+    <div class="container-fluid login-container">
+        <div class="row h-100">
+            <!-- Image Section - 70% on left -->
+            <div class="col-md-8 col-lg-8 order-md-1 login-image d-none d-md-block">
+                <img src="~/images/DP.jpeg" alt="Login Image">
+            </div>
+            <!-- Login Form Section - 30% on right -->
+            <div class="col-md-4 col-lg-4 order-md-2 login-form-section">
+                <div class="login-card p-4">
+                    <div class="login-logo">
+                        <a href="#"><b>Leave</b> Management</a>
+                    </div>
+                    <!-- /.login-logo -->
+                    <div class="card">
+                        <div class="card-body login-card-body">
+                            <p class="login-box-msg">Sign in to start your session</p>
+                            
+                            @if (!ViewData.ModelState.IsValid)
+                            {
+                                <div class="alert alert-danger">
+                                    @Html.ValidationSummary(true)
+                                </div>
+                            }
+
+                            <form asp-action="Login" method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="input-group mb-3">
+                                    <input asp-for="PinNo" type="text" class="form-control" placeholder="User ID">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span class="fas fa-user"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="PinNo" class="text-danger"></span>
+                                
+                                <div class="input-group mb-3">
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="Password">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span class="fas fa-lock"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                                
+                                <div class="row">
+                                    <div class="col-8">
+                                        <div class="icheck-primary">
+                                            <input type="checkbox" asp-for="RememberMe" id="remember">
+                                            <label for="remember">
+                                                Remember Me
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- /.col -->
+                                    <div class="col-4">
+                                        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                                    </div>
+                                    <!-- /.col -->
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /.login-card-body -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.login-container -->
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

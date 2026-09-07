@@ -1,0 +1,98 @@
+﻿@model Leave_Management_System.Models.LeaveMatrix
+
+@{
+    ViewData["Title"] = "Leave Matrix";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-info text-white text-center">
+                    <h4><i class="fas fa-eye"></i> Leave Matrix / Details</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Team/Project</label>
+                        <div class="form-control bg-light">
+                            @ViewBag.Name
+                        </div>
+                    </div>                  
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Level</label>
+                        <div class="form-control bg-light">
+                            @Model.Level
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">To Role</label>
+                        <div class="form-control bg-light">
+                            @(Model.RoleMaster?.RoleName ?? "N/A")
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Status</label>
+                        <div class="form-control bg-light">
+                            @Model.Status
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Created By</label>
+                        <div class="form-control bg-light">
+                            @ViewBag.CreatedBy
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Created On</label>
+                        <div class="form-control bg-light">
+                            @Model.CreatedDatetime.ToString("dd-MM-yyyy hh:mm tt")
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Updated By</label>
+                        <div class="form-control bg-light">
+                            @if (Model.UpdatedBy != 0)
+                            {
+                                @ViewBag.UpdatedBy
+                            }
+                            else
+                            {
+                                <span>Not Updated</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Updated On</label>
+                        <div class="form-control bg-light">
+                            @if (Model.UpdatedDatetime >= Model.CreatedDatetime)
+                            {
+                                @Model.UpdatedDatetime.ToString("dd-MM-yyyy hh:mm tt")
+                            }
+                            else
+                            {
+                                <span>Not Updated</span>
+                            }
+                        </div>
+                    </div>               
+
+                </div>
+
+                <div class="card-footer text-end">
+                    <button class="btn btn-outline-secondary" onclick="history.back()">Back</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,199 @@
+﻿@{
+    ViewData["Title"] = "Leave Management";
+   
+}
+
+<div class="container-fluid">
+    <form method="post">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="h3">Leave List</span>
+            <a class="btn btn-success float-end" asp-action="Create">
+                <i class="fa fa-plus"></i> Apply Leave
+            </a>
+        </div>
+
+        <div class="card-body">
+            <table id="leaveTable" class="display compact table table-bordered mx-auto" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ref No</th>
+                        <th>Employee</th>
+                        <th>Reason</th>
+                        <th>Leave Dates</th>
+                        <th>Status</th>
+                        <th>Pending With</th>
+                        <th>Creation Details</th>
+                        <th>Update Details</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="card-footer">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+              
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            $('#leaveTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ordering: false,
+
+                ajax: {
+                    url: '@Url.Action("List", "Leave")',
+                    type: 'POST'
+                },
+
+           columns: [
+
+            { data: 'serialNo', orderable: false, searchable: false },
+
+            { data: 'referenceNo' },
+
+            { data: 'employeeName' },
+
+            { data: 'leaveReason' },
+
+            // ✅ Leave Dates (Start + Join)
+            {
+                data: null,
+                render: function (data) {
+                    return `
+                        <span class="badge bg-primary">
+                            Start: ${data.startDate ?? '-'}
+                        </span><br/>
+                        <span class="badge bg-success">
+                            Join: ${data.joinDate ?? '-'}
+                        </span>
+                    `;
+                }
+            },
+
+            // ✅ Status (with badge)
+            {
+                data: 'status',
+                render: function (data) {
+                    let badgeClass = 'bg-secondary';
+
+                    if (data === 'ACTIVE') badgeClass = 'bg-success';
+                    else if (data === 'REJECTED') badgeClass = 'bg-danger';
+                    else if (data === 'PENDING') badgeClass = 'bg-warning';
+
+                    return `<span class="badge ${badgeClass}">${data}</span>`;
+                }
+            },
+
+            { data: 'pendingWith' },
+
+            // ✅ Created Details
+            {
+                data: null,
+                render: function (data) {
+                    return `
+                        <small>
+                            Created By: <b>${data.createdBy ?? '-'}</b><br/>
+                            ${data.createdDateTime ?? '-'}
+                        </small>
+                    `;
+                }
+            },
+
+            // ✅ Updated Details
+            {
+                data: null,
+                render: function (data) {
+                    return `
+                        <small>
+                            Updated By: <b>${data.updatedBy ?? '-'}</b><br/>
+                            ${data.updatedDateTime ?? '-'}
+                        </small>
+                    `;
+                }
+            },
+
+            // ✅ Actions
+            {
+                data: 'id',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+                    return `
+                        <a href="/Leave/Details/${data}" class="btn btn-info btn-sm">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+
+                         ${row.draft === 'Yes' ? `
+                <a href="/Leave/Edit/${row.id}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+            ` : ''}
+
+                        <button class="btn btn-danger btn-sm"
+                                onclick="deleteLeave('${data}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                }
+            }
+        ],
+
+               
+            });
+
+        });
+
+        // DELETE FUNCTION
+        function deleteLeave(id) {
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This record will be deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!'
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+
+                    $.ajax({
+                        url: `/Leave/Delete/${id}`,
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Deleted!', response.message, 'success');
+                                $('#leaveTable').DataTable().ajax.reload();
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+
+                        error: function () {
+                            Swal.fire('Error!', 'Delete failed', 'error');
+                        }
+                    });
+
+                }
+            });
+        }
+    </script>
+
+}

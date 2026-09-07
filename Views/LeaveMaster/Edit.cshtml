@@ -1,0 +1,120 @@
+﻿@model Leave_Management_System.Models.LeaveMaster
+
+@{
+    ViewData["Title"] = "Edit Leave Master";
+  
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <form id="editForm" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Hidden ID -->
+                <input type="hidden" asp-for="Id" value="@Model.Id" />
+
+                <div class="card shadow">
+
+                    <div class="card-header bg-warning text-center">
+                        <h4><i class="fas fa-edit"></i> Edit Leave Reason</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Leave Name -->
+                        <div class="mb-3">
+                            <label class="form-label required">Leave Name</label>
+                            <input asp-for="LeaveName"
+                                   class="form-control req"
+                                   placeholder="Enter leave name"
+                                   data-error="Leave name is required" />
+                            <span asp-validation-for="LeaveName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label required">Status</label>
+                            <select asp-for="Status" class="form-select req">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">Back</a>
+                        <button type="submit" class="btn btn-warning">Update</button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+                       
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            $('#editForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (!$('#editForm').length) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Form Error',
+                            text: 'The form is not properly initialized. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                }
+                         const isValid = $('#editForm').universalValidate();
+        if (!isValid) return;
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Edit", "LeaveMaster")',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated',
+                                text: response.message
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "LeaveMaster")';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong'
+                        });
+                    }
+                });
+
+            });
+
+        });
+    </script>
+}

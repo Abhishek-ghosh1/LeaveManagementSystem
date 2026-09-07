@@ -1,0 +1,576 @@
+﻿@model Leave_Management_System.Models.LeaveDetailsViewModel
+
+@{
+    ViewData["Title"] = "Leave Details";
+   
+}
+
+@* Header*@
+
+ <button class="btn btn-primary btn-block" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="true" aria-controls="collapseExample">
+    <span>
+
+        Leave Details - Ref No : @(Model.Leave.ReferenceNo ?? "N/A")
+
+    </span>
+</button>
+
+<div class="collapse show mt-2 collapseExample" id="collapseExample">
+
+    <div class="form-horizontal">
+        @{
+            var pendingWithClass = "";
+            var pendingWithMsg = "";
+
+            var Status = Model.Leave.Status;
+
+            if (Status == "ACTIVE" && Model.PendingFlow != null)
+            {
+                pendingWithClass = "is-invalid";
+                pendingWithMsg = $"Pending With {(Model.PendingFlow?.Users?.Name ?? "Unknown User")} ({Model.PendingFlow?.RoleMaster?.RoleName ?? "Unknown Role"})";
+            }
+            else if (Status == "Approved")
+            {
+                pendingWithClass = "is-valid";
+                pendingWithMsg = "APPROVED";
+            }
+            else if (Status == "Rejected")
+            {
+                pendingWithClass = "is-invalid";
+                pendingWithMsg = "REJECTED";
+            }
+            else if (Status == "DRAFT")
+            {
+                pendingWithClass = "is-warning";
+                pendingWithMsg = "DRAFT";
+            }
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Leave Status:</label>
+                        <div class="col-sm-9">
+                            <input type="text"
+                                   class="form-control @pendingWithClass"
+                                   value="@pendingWithMsg"
+                                   readonly />
+                        </div>
+                    </div>
+                        
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+
+            <div class="card">
+                <div class="card-header bg-info text-white text-center">
+                    <span class="h3 fw-semibold">
+                        <i class="fas fa-eye"></i> Leave Details
+                    </span>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!-- Employee -->
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Employee</label>
+                            <div class="form-control bg-light">
+                                @Model.Leave.Employee?.Name
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="col-md-4 mb-3">
+                            <label class="required">Reason for Leave</label>
+                            <div class="form-control bg-light">
+                                @Model.LeaveReasonName
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Description</label>
+                            <div class="form-control bg-light">
+                                @Model.Leave.LeaveDescription
+                            </div>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Start Date</label>
+                            <div class="form-control bg-light">
+                                @Model.Leave.StartDate.ToString("dd-MMM-yyyy")
+                            </div>
+                        </div>
+
+                        <!-- Join Date -->
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Joining Date</label>
+                            <div class="form-control bg-light">
+                                @Model.Leave.JoinDate.ToString("dd-MMM-yyyy")
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-4 mb-3">
+                            <label class="fw-bold">Status</label>
+                            <div class="form-control bg-light">
+                                @Model.Leave.Status
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- File Section -->
+                    <fieldset class="border p-3 mb-4">
+                        <legend class="float-none w-auto p-2">Uploaded Files</legend>
+
+                        <!-- PDF Files -->
+                        <div class="form-group row mb-3">
+                            <label class="col-sm-4 col-form-label">PDF File</label>
+                            <div class="col-sm-8 pt-2">
+                                @if (!string.IsNullOrEmpty(Model.Leave.UploadPDFFile))
+                                {
+                                    var pdfFiles = Model.Leave.UploadPDFFile
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+
+                                    if (pdfFiles.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-3 mb-2">
+                                            @foreach (var file in pdfFiles)
+                                            {
+                                                <div class="flex-shrink-0 image-wrapper" data-file="@file">
+                                                    @await Html.PartialAsync("_DocumentPreview", new DocumentPreviewViewModel
+                                                    {
+                                                        FileName = file,
+                                                                                Path = $"~/uploads/Leave/{file}"
+                                                                                })
+                                    </div>
+                                                                        }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No file uploaded</span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Other Related Documents -->
+                        <div class="form-group row mb-3">
+                            <label class="col-sm-4 col-form-label">Other Related Documents</label>
+                            <div class="col-sm-8 pt-2">
+                                @if (!string.IsNullOrEmpty(Model.Leave.OtherRelatedDocs))
+                                {
+                                    var otherFiles = Model.Leave.OtherRelatedDocs
+                                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                    .Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+
+                                    if (otherFiles.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-3 mb-2">
+                                            @foreach (var file in otherFiles)
+                                            {
+                                                <div class="flex-shrink-0 image-wrapper" data-file="@file">
+                                                    @await Html.PartialAsync("_DocumentPreview", new DocumentPreviewViewModel
+                                                    {
+                                                        FileName = file,
+                                                                                Path = $"~/uploads/Leave/{file}"
+                                                                                })
+                                    </div>
+                                                                        }
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No file uploaded</span>
+                                }
+                            </div>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+                <div class="card-footer text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>               
+        
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewLabel">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" class="img-fluid rounded shadow" alt="Preview" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@*   Flow  *@
+
+@{
+    int index = 0;
+}
+@if (Model.LeaveFlows != null)
+{
+    foreach (var flow in Model.LeaveFlows)
+    {
+        var ColorCode = "primary";
+        if (flow.Status == "Approved")
+        {
+            ColorCode = "success";
+        }
+        else if (flow.Status == "Pending")
+        {
+            ColorCode = "warning";
+        }
+        else if (flow.Status == "Rejected")
+        {
+            ColorCode = "danger";
+        }
+
+        <button class="btn btn-@(ColorCode) btn-block mt-2 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample_@index" aria-expanded="false" aria-controls="collapseExample_@index">
+            <div class="d-flex flex-row">
+
+                <span class="mr-2">@flow.Users?.Name (@flow.RoleMaster?.RoleName)</span>
+                <span> Remarks</span>
+
+            </div>
+
+        </button>
+
+        <div class="collapse mt-2 collapseExample" id="collapseExample_@index">
+            <div class="card mt-2">
+                <div class="card-body">
+                    <div class="row">
+                        @if (flow.Level != 0)
+                        {
+                            <!-- Action Taken -->
+                            <div class="col-md-12 mb-3">
+                                <label for="ActionTaken1" class="form-label">Action Taken </label>
+                                @if (flow.Status == "Approved")
+                                {
+                                    <input value="Approved" class="form-control is-valid" readonly />
+                                }
+                                else if (flow.Status == "Pending")
+                                {
+                                    <input value="Pending" class="form-control is-invalid" readonly />
+                                }
+                                else if (flow.Status == "Rejected")
+                                {
+                                    <input value="Rejected" class="form-control is-invalid" readonly />
+                                }
+                                else
+                                {
+                                    <input value="" class="form-control" readonly />
+                                }
+                            </div>
+                        }
+
+                        <div class="col-md-12 mb-3">
+                            <label for="ActionTaken1" class="form-label">Remarks</label>
+                            <textarea class="form-control" rows="3" readonly>@flow.ActionTaken</textarea>
+                        </div>
+
+                        <!-- Action Details Card -->
+                        <div class="col-md-12 mb-4">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Action Details</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Action Taken By</label>
+                                        @if (flow.UpdatedBy == null)
+                                        {
+                                            <input type="text" class="form-control" value="Auto Forwarded by System" readonly />
+                                        }
+                                        else if (flow.UpdatedBy == flow.UserId)
+                                        {
+                                            <input type="text" class="form-control" value="@flow.Users?.Name" readonly />
+                                        }
+                                        else if (flow.UpdatedBy != flow.UserId && flow.UpdatedBy != null)
+                                        {
+                                            <p class="form-control-plaintext text-primary">
+                                                <strong>
+                                                    @(Model.Users?.Where(m => m.Id == flow.UpdatedBy).Select(m => m.Name).FirstOrDefault() ?? "")
+                                    </strong>
+                                    <span class="text-muted">Taken Action On Behalf Of</span>
+                                    <strong>@(flow.Users?.Name)</strong>
+                                </p>
+                                        }
+                                        else
+                                        {
+                                            <input type="text" class="form-control" value="Not Taken" readonly />
+                                        }
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label fw-bold">Action Taken Datetime</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-clock"></i> <!-- Bootstrap Icons -->
+                                            </span>
+                                            <input type="text" class="form-control" value="@(flow.ActionTakenDatetime?.ToString("dd MMM yyyy, hh:mm tt") ?? "Not Available")" readonly />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="ActionTaken1" class="form-label">Action Taken Date & Time</label>
+                                <input type="text" class="form-control"
+                                       value="@(flow.ActionTakenDatetime?.ToString("dd-MM-yy hh:mm tt") ?? "Not Available")" readonly>
+                            </div>
+
+                        </div>
+
+                        @if (flow.Level != 0)
+                        {
+                            <!-- Upload Document -->
+                            <div class="border p-3 rounded mb-3" id="box3">
+                                <div class="border rounded-pill bg-light px-4 py-2 text-center mb-3">
+                                    <span class="h5">Uploaded Document</span>
+                                </div>
+                                <div class="form-group col-md-12">
+
+                                    @{
+                                        if (!string.IsNullOrEmpty(flow.Document))
+                                        {
+                                            var files = flow.Document.Split(',')
+                                            .Where(f => !string.IsNullOrEmpty(f)).ToList();
+
+                                            if (files.Any())
+                                            {
+                                                <div class="d-flex flex-wrap gap-3">
+                                                    @foreach (var file in files)
+                                                    {
+                                                        <div class="flex-shrink-0">
+                                                            @await Html.PartialAsync("_DocumentPreview", new DocumentPreviewViewModel
+                                                            {
+                                                                FileName = file,
+                                                                Path = $"~/uploads/Leave/{file}"
+                                                                })
+                            </div>
+                                                        }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic">No documents uploaded</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">No documents uploaded</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        index++;
+    }
+}
+
+<!-- Form Open for Approval -->
+
+@if (Model.IsPendingApprover)
+{
+    var pendingFlow = Model.PendingFlow;
+
+    <button class="btn btn-primary btn-block mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="true" aria-controls="collapseExample2">
+        <div class="d-flex flex-row">
+            <span class="mr-2">Pending with</span>
+            <span class="mr-2">@(pendingFlow?.Users?.Name ?? Model.CurrentUserName) (@(pendingFlow?.RoleMaster?.RoleName ?? "Unknown Role"))</span>
+        </div>
+    </button>
+
+    if (pendingFlow != null && pendingFlow.Status == "Pending")
+    {
+        <div class="collapse show mt-2 collapseExample" id="collapseExample2">
+            <div class="card mt-2">
+                <div class="card-body">
+                    <form id="approveLeaveForm" autocomplete="off">
+                        <input type="hidden" name="LeaveId" value="@Model.Leave.Id" />
+                        <input type="hidden" name="ObservationFlowId" value="@pendingFlow.Id" />
+                        <input type="hidden" name="CurrentUserId" value="@Model.CurrentUserId" />
+
+                        <div class="row">
+                            <!-- Action Taken -->
+                            <div class="col-md-6 mb-3">
+                                <label for="ActionTaken1" class="form-label required">Action Taken</label>
+                                <div class="d-flex flex-row">
+                                    <div class="col-md-3 form-check">
+                                        <input class="form-check-input action-taken-radio" type="radio" name="Status_to" value="Approved" id="StatusTo1" required>
+                                        <label class="form-check-label" for="StatusTo1">
+                                            Accept
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-3 form-check">
+                                        <input class="form-check-input action-taken-radio" type="radio" name="Status_to" value="Rejected" id="StatusTo2">
+                                        <label class="form-check-label" for="StatusTo2">
+                                            Reject
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Taken Details -->
+                            <div class="col-md-12 mb-3">
+                                <label for="ActionTakenDetails" class="form-label required">Remarks</label>
+                                <textarea class="form-control" id="ActionTakenDetails" name="ActionTaken" rows="3" placeholder="Type your remarks..." required></textarea>
+                            </div>
+
+                            <!-- Upload Document -->
+                            <div class="border p-3 rounded mb-3" id="box3">
+                                <div class="border rounded-pill bg-light px-4 py-2 text-center mb-3">
+                                    <span class="h5">Upload Document (Optional)</span>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="custom-file">
+                                        <input type="file" name="Document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="form-control-file" id="UploadDocuments">
+                                        <label for="UploadDocuments" class="custom-file-label" id="fileLabel1">Choose file...</label>
+                                    </div>
+                                    <span id="fileError1" class="text-danger"></span>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div id="filePreview1" class="mt-2 d-flex flex-wrap">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Approved By -->
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">Approved By</label>
+                                <input type="text" class="form-control" value="@Model.CurrentUserName" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12 text-right">
+                                <button type="button" class="btn btn-primary" id="actionformsubmitbtn">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+
+    <script>
+        // Image click to show modal preview
+        $(document).on('click', '.img-thumbnail', function () {
+            const src = $(this).attr('src');
+            $('#previewImage').attr('src', src);
+            const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            modal.show();
+        });
+
+        // jQuery AJAX for Approve/Reject
+        $('#actionformsubmitbtn').on('click', function (e) {
+            e.preventDefault();
+
+            // Validate form
+            const form = $('#approveLeaveForm')[0];
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Check if action is selected
+            const statusTo = $('input[name="Status_to"]:checked').val();
+            if (!statusTo) {
+                alert('Please select Accept or Reject');
+                return;
+            }
+
+            // Create FormData
+            const formData = new FormData(form);
+            const fileInput = $('#UploadDocuments')[0];
+            if (fileInput.files.length > 0) {
+                formData.append('Document', fileInput.files[0]);
+            }
+          
+           // AJAX request
+            $.ajax({
+                url: '@Url.Action("ApproveLeave", "Leave")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                       success: function (response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = '@Url.Action("Index", "Leave")';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'Error processing request'
+                });
+
+                btn.prop('disabled', false).text('Submit');
+            }
+        },
+        error: function (xhr, status, error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message || error || 'An error occurred'
+            });
+
+            btn.prop('disabled', false).text('Submit');
+        }
+            });
+        });
+    </script>
+
+    <script>
+    $(document).ready(function () {
+        setupFilePreview('#UploadDocuments', '#filePreview1', '#fileError1', 10, 10);
+    });
+</script>
+
+}

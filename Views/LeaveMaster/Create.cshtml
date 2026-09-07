@@ -1,0 +1,110 @@
+﻿@model Leave_Management_System.Models.LeaveMaster
+
+@{
+    ViewData["Title"] = "Create Leave Reason";
+  
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <form id="createLeaveMasterForm" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-center text-white">
+                        <h4>Create Leave Reason</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Leave Name -->
+                        <div class="mb-3">
+                            <label class="form-label required">Leave Name</label>
+                            <input asp-for="LeaveName"
+                                   class="form-control req"
+                                   placeholder="Enter Leave name"
+                                   data-error="Leave name is required" />
+                            <span asp-validation-for="LeaveName" class="text-danger"></span>
+                        </div>
+
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">Back</a>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+               
+          
+
+@section Scripts {
+  
+    <script>
+        $(document).ready(function () {
+
+            $('#createLeaveMasterForm').on('submit', function (e) {
+                e.preventDefault();
+
+                 if (!$('#createLeaveMasterForm').length) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Form Error',
+                            text: 'The form is not properly initialized. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                 }
+
+                       const isValid = $('#createLeaveMasterForm').universalValidate();
+  if (!isValid) return;
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Create", "LeaveMaster")',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "LeaveMaster")';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong'
+                        });
+                    }
+                });
+
+            });
+
+        });
+    </script>
+}

@@ -1,0 +1,251 @@
+﻿@model Leave_Management_System.Models.Leave
+
+@{
+    ViewData["Title"] = "Leave Management System";
+   
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+
+            <form id="createLeaveForm" enctype="multipart/form-data" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="card">
+                    <div class="card-header bg-primary text-center">
+                        <span class="h3 fw-semibold">
+                            <i class="fas fa-file"></i> Fill Leave Form
+                        </span>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <!-- Employee -->
+                            <div class="col-md-4 mb-3">
+                                <label class="required">Employee</label>
+                                <select asp-for="EmpUserID"
+                                        class="form-select req"
+                                        data-error="Select an Employee"
+                                        asp-items="Model.Employees">
+                                    <option value="">-- Select Employee --</option>
+                                </select>
+                            </div>
+
+                            <!-- Leave Reason -->
+                            <div class="col-md-4 mb-3">
+                                <label class="required">Reason for Leave</label>
+                                <select asp-for="LeaveReasonId"
+                                        class="form-select req"
+                                        data-error="Leave reason is required"
+                                    asp-items="Model.LeaveReasons">
+                                </select>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-4 mb-3">
+                                <label class="required">Leave Description</label>
+                                <textarea type="text"
+                                       asp-for="LeaveDescription"
+                                       class="form-control req"
+                                       placeholder="Enter description"
+                                       data-error="Description is required" ></textarea>
+                            </div>
+
+                            <!-- Start Date -->
+                            <div class="col-md-4 mb-3">
+                                <label class="required">Start Date</label>
+                                <input type="date"
+                                       asp-for="StartDate"
+                                       class="form-control req"
+                                       data-error="Start Date required" />
+                            </div>
+
+                            <!-- Join Date -->
+                            <div class="col-md-4 mb-3">
+                                <label class="required">Joining Date</label>
+                                <input type="date"
+                                       asp-for="JoinDate"
+                                       class="form-control req"
+                                       data-error="Joining Date required" />
+                            </div>
+
+                        </div>
+
+                        <!-- File Upload -->
+                        <fieldset class="border p-3 mb-4">
+
+                            <legend class="float-none w-auto p-2">Upload Files</legend>
+
+                            <div class="row g-3">
+
+                                <div class="form-group row mb-3">
+
+                                    <label class="col-sm-4 col-form-label required">
+                                        PDF File
+                                    </label>
+
+                                    <div class="col-sm-8">
+
+                                        <div class="custom-file">
+                                            <input type="file" class="form-control-file" data-error="Please Upload Pdfs." id="PDFFile" name="PDFFile" accept=".pdf">
+                                            <label for="PDFFile" class="custom-file-label" id="PdffileLabel">Choose pdf...</label>
+                                        </div>
+
+                                        <span id="fileError" class="text-danger"></span>
+                                        <div class="form-group col-md-12">
+                                            <div id="PdffilePreview" class="mt-2 d-flex flex-wrap">
+                                            </div>
+                                        </div>
+
+                                        <small class="form-text text-muted">
+                                            Allowed: Only PDF files
+                                        </small>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group row mb-3">
+                                    <label class="col-sm-4 col-form-label required">
+                                        Other Related Documents
+                                    </label>
+
+                                    <div class="col-sm-8">
+
+                                        <div class="custom-file">
+                                            <input type="file" class="form-control-file" data-error="Please Upload Images." accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.txt"
+                                                   id="OriginalFile" name="OtherDocs">
+                                            <label for="OriginalFile" class="custom-file-label" id="OrgfileLabel">Choose media...</label>
+                                        </div>
+                                        <span id="fileError" class="text-danger"></span>
+                                        <div class="form-group col-md-12">
+                                            <div id="OrgfilePreview" class="mt-2 d-flex flex-wrap">
+                                            </div>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Allowed: Documents, Images (No videos).
+                                        </small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">Back</a>
+                        <div>
+                            <button type="submit" id="btnDraft" class="btn btn-warning me-2">
+                                <i class="fas fa-save"></i> Save as Draft
+                            </button>
+                            <button type="submit" id="btnSubmit" class="btn btn-info">
+                                <i class="fas fa-paper-plane"></i> Submit
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>           
+
+@section Scripts {
+  
+    <script>
+
+        let actionType = "";
+        let isSubmitting = false;
+
+        $(document).ready(function () {
+            setupFilePreview('#OriginalFile', '#OrgfilePreview', '#fileError', 10, 10);
+            setupFilePreview('#PDFFile', '#PdffilePreview', '#fileError', 10, 10);
+
+            // Identify which button was pressed
+            $('#btnSubmit').on('click', function () {
+                actionType = 'submit';
+            });
+
+            $('#btnDraft').on('click', function () {
+                actionType = 'draft';
+            });
+
+            // Correct Form ID
+            $('#createLeaveForm').on('submit', function (e) {
+                e.preventDefault();
+
+                if (isSubmitting) return; // Prevent double submission
+                isSubmitting = true;
+
+                if (!$('#createLeaveForm').length) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Form Error',
+                        text: 'The form is not properly initialized. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                    isSubmitting = false;
+                    return;
+                }
+
+                 const isValid = $('#createLeaveForm').universalValidate();
+                        if (!isValid) {
+            isSubmitting = false;
+            return;
+        }
+
+                const form = this;
+                $('#modal-loader').modal('show');
+                var formData = new FormData(form);
+                
+                // Add the action type to form data
+                if (actionType) {
+                    formData.append('submitType', actionType);
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("Create", "Leave")',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+
+                    success: function (response) {
+                        isSubmitting = false;
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message
+                            }).then(() => {
+                                window.location.href = '@Url.Action("Index", "Leave")';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+
+                    error: function () {
+                        isSubmitting = false;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong'
+                        });
+                    }
+                  });
+            });
+
+        });
+    </script>
+
+}

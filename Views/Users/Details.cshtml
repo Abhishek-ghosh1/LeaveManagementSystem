@@ -1,0 +1,90 @@
+﻿@model Leave_Management_System.Models.Users
+
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+    <div class="card">
+
+        <div class="card-header bg-primary text-center">
+            <h4 class="m-0 text-white">Detail </h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Name</strong></div>
+                <div class="col-md-8">@Model.Name</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>User ID</strong></div>
+                <div class="col-md-8">@Model.PinNo</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Team Name</strong></div>
+                        <div class="col-md-8">
+
+
+                            @foreach (var name in ViewBag.Team_ProjectName)
+                                {
+                                    <span class="badge bg-primary me-1">@name</span>
+                                }
+                            
+                        </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Role Name</strong></div>
+                <div class="col-md-8">@ViewBag.RoleName</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Status</strong></div>
+                <div class="col-md-8">
+                    <span class="badge @(Model.Status == "ACTIVE" ? "bg-success" :"bg-danger" )">
+                        @Model.Status
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Created By</strong></div>
+                <div class="col-md-8">@ViewBag.CreatedBy</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Created Date</strong></div>
+                <div class="col-md-8">
+                    @Model.CreatedDatetime.ToString("dd-MM-yyyy HH:mm")
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Updated By</strong></div>
+                <div class="col-md-8">
+                    @(Model.UpdatedBy.HasValue? ViewBag.UpdatedBy.ToString() : "N/A")
+                </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Updated Date</strong></div>
+                <div class="col-md-8">
+                    @(Model.UpdatedDatetime.HasValue
+                                        ? Model.UpdatedDatetime.Value.ToString("dd-MM-yyyy HH:mm")
+                                        : "N/A")
+                </div>
+            </div>
+
+        </div>
+    </div>
+        </div>
+    </div>
+
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</div>
+
+             
+           

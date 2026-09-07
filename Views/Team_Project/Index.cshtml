@@ -1,0 +1,150 @@
+﻿@{
+    ViewData["Title"] = "Management";
+}
+
+<div class="container-fluid">
+    <form method="post">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="h3"> List</span>
+            <a class="btn btn-success float-end" asp-action="Create">
+                <i class="fa fa-plus"></i> Add
+            </a>
+        </div>
+
+        <div class="card-body">
+            <table id="Table" class="display compact table table-bordered mx-auto" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="card-footer">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            $('#Table').DataTable({
+                processing: true,
+                serverSide: true,
+                ordering: false,
+
+                ajax: {
+                    url: '@Url.Action("List", "Team_Project")',
+                    type: 'POST'
+                },
+
+                columns: [
+
+                    { data: 'serialNo', orderable: false, searchable: false },
+
+                    { data: 'name' },
+
+                    {
+                        data: 'status',
+                        render: function (data) {
+                            let badge = 'secondary';
+
+                            if (data === "ACTIVE") badge = 'success';
+                            if (data === "INACTIVE") badge = 'danger';
+
+                            return `<span class="badge bg-${badge}">${data}</span>`;
+                        }
+                    },
+
+                    { data: 'createdDatetime' },
+
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data) {
+                            return `
+                                <a href="/Team_Project/Details/${data}" class="btn btn-info btn-sm"
+                                 data-toggle="tooltip" title="Details">
+                                     <i class="fas fa-info-circle"></i>
+                                </a>
+
+                                <a href="/Team_Project/Edit/${data}" class="btn btn-warning btn-sm"
+                                 data-toggle="tooltip" title="Edit">
+                                   <i class="fas fa-edit"></i>
+                                </a>
+
+                                <button class="btn btn-danger btn-sm"
+                                        onclick="deleteIt('${data}')"
+                                         data-toggle="tooltip" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+
+                            `;
+                        }
+                    }
+                ],
+
+               // scrollY: 400,
+                scrollCollapse: true,
+               // fixedHeader: true
+            });
+
+        });
+
+        // DELETE FUNCTION
+        function deleteIt(id) {
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This role will be deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!'
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+
+                    $.ajax({
+                        url: `/Team_Project/Delete/${id}`,
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Deleted!', response.message, 'success');
+                                $('#Table').DataTable().ajax.reload();
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+
+                        error: function () {
+                            Swal.fire('Error!', 'Delete failed', 'error');
+                        }
+                    });
+
+                }
+            });
+        }
+    </script>
+
+}

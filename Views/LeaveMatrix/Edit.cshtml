@@ -1,0 +1,139 @@
+﻿@model Leave_Management_System.Models.LeaveMatrix
+
+@{
+    ViewData["Title"] = "Leave Matrix";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <form id="editForm" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="RoleMasterId" value="@ViewBag.RoleMasterId" readonly />
+
+                <input type="hidden" name="Id" value="@ViewBag.DecryptedId" />
+
+                <!-- Hidden Level (important for post) -->
+                <input type="hidden" asp-for="Level" value="@ViewBag.Level" />
+
+                <div class="card shadow">
+
+                    <div class="card-header bg-warning text-center">
+                        <h4><i class="fas fa-edit"></i> Edit Leave Matrix</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="form-group mb-3">
+                            <label class="control-label">Role</label>
+                            <input type="text" class="form-control" value="@ViewBag.Name" readonly />
+                        </div>
+
+                        <!-- Level (Readonly Display Only) -->
+                        <div class="form-group mb-3">
+                            <label class="control-label">Level</label>
+                            <input value="@ViewBag.Level" class="form-control" readonly />
+                        </div>
+
+                        <!-- Role -->
+                        <div class="form-group mb-3">
+                            <label class="control-label required">Role</label>
+                            <select asp-for="ToRole" class="form-control req select2" asp-items="ViewBag.Roles" id="RolesDropdown" required>
+                                <option value="">-- Select a Role --</option>
+                            </select>
+                            <span asp-validation-for="ToRole" class="text-danger"></span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Status" class="control-label"></label>
+                            <select asp-for="Status" class="form-control">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer OUTSIDE body -->
+                    <div class="card-footer d-flex justify-content-between">
+                      
+                            <button class="btn btn-outline-secondary" onclick="history.back()">Back</button>
+                       
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+             $('.select2').select2({
+            width: '100%'
+        });
+
+
+            var selectedRole = '@Model.ToRole';
+            if (selectedRole) {
+                $('#RolesDropdown').val(selectedRole).trigger('change');
+            }
+
+            $('#editForm').on('submit', function (e) {
+                e.preventDefault();
+
+                  if (!$('#editForm').length) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Form Error',
+                            text: 'The form is not properly initialized. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                 }
+
+                $('#modal-loader').modal('show');
+                var $form = $(this);
+                $.ajax({
+                    url: '@Url.Action("Edit", "LeaveMatrix")',
+                    type: 'POST',
+                    data: $form.serialize(),
+                    success: function (response) {
+                        $('#modal-loader').modal('hide');
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message || 'Leave Matrix updated successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'Ok'
+                            }).then(() => {
+                                 window.location.href = '/LeaveMatrix/Index?id=' + response.id;
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.message || 'An error occurred while updating the Leave Matrix.',
+                                icon: 'error',
+                                confirmButtonText: 'Try Again'
+                            });
+                        }
+                    },
+                    error: function () {
+                        $('#modal-loader').modal('hide');
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'Close'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

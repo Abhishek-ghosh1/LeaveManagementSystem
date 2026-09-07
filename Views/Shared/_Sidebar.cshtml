@@ -1,0 +1,158 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+        <span class="brand-text font-weight-light">Leave Management</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <i class="fas fa-user-circle img-circle elevation-2" style="font-size: 34px; color: white;"></i>
+            </div>
+            <div class="info">
+                <a href="#" class="d-block text-white">@ViewBag.UserName</a>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+
+                 <!-- Role Menu -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RoleMaster" ? "active" : "")">
+                        <i class="nav-icon fas fa-shield-alt"></i>
+                        <p>
+                            Roles
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a asp-controller="RoleMaster" asp-action="Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Roles List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="RoleMaster" asp-action="Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add Roles</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Team_Project Menu -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Team_Project" ? "active" : "")">
+                        <i class="nav-icon fas fa-project-diagram"></i>
+                        <p>
+                            Team/Project
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a asp-controller="Team_Project" asp-action="Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Team_Project" asp-action="Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>            
+
+                <!-- Leave Menu -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LeaveMaster" ? "active" : "")">
+                        <i class="nav-icon fas fa-clipboard-list"></i>
+                        <p>
+                            Leave Reasons
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a asp-controller="LeaveMaster" asp-action="Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Leave Reason List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="LeaveMaster" asp-action="Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add Leave Reasons</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Users Menu -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>
+                            Users
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a asp-controller="Users" asp-action="Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>User List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Users" asp-action="Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Add User</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Leave Menu -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Leave" ? "active" : "")">
+                        <i class="nav-icon fas fa-calendar-alt"></i>
+                        <p>
+                            Leave Options
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a asp-controller="Leave" asp-action="Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Leave List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Leave" asp-action="Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Apply Leave</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</aside>

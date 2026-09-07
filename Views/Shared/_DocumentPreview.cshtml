@@ -1,0 +1,184 @@
+﻿@model DocumentPreviewViewModel
+
+@{
+    var extension = System.IO.Path.GetExtension(Model.FileName)?.TrimStart('.').ToLowerInvariant();
+    var isImage = new[] { "jpg", "jpeg", "png", "gif", "bmp" }.Contains(extension);
+    var filePath = Url.Content(Model.Path);
+    var fileName = System.IO.Path.GetFileName(Model.FileName);
+}
+
+<div class="document-preview">
+    @if (isImage)
+    {
+        <img src="@filePath"
+             alt="@Model.FileName"
+             class="img-thumbnail"
+             style="height:100px; cursor:pointer;" />
+    }
+   
+    else
+    {
+        <!-- 📄 Document -->
+        <div class="document-icon" onclick="showMediaModal('@filePath', 'file', '@extension')">
+            <i class="@GetFileIcon(extension)"></i>
+            <span>@System.IO.Path.GetFileNameWithoutExtension(Model.FileName)</span>
+        </div>
+    }
+
+    <a href="@filePath" download="@fileName" class="download-btn no-print" title="Download @fileName">
+        <i class="fas fa-download"></i>
+    </a>
+</div>
+
+@functions {
+    string GetFileIcon(string extension)
+    {
+        return extension switch
+        {
+            "pdf" => "fas fa-file-pdf text-danger",
+            "doc" or "docx" => "fas fa-file-word text-primary",
+            "xls" or "xlsx" => "fas fa-file-excel text-success",
+            "ppt" or "pptx" => "fas fa-file-powerpoint text-warning",
+            "txt" => "fas fa-file-alt text-secondary",
+            "zip" or "rar" => "fas fa-file-archive text-muted",
+            "mp4" or "webm" or "mov" => "fas fa-video text-danger",
+            _ => "fas fa-file text-info"
+        };
+    }
+}
+
+<style>
+    .document-preview {
+        position: relative;
+        width: 110px;
+        height: 110px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .document-thumbnail {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .document-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .document-icon:hover {
+        background: #e9ecef;
+    }
+
+    .document-icon i {
+        font-size: 2rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .document-icon span {
+        font-size: 0.7rem;
+        text-align: center;
+        max-width: 90%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .download-btn {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        padding: 0.25rem;
+        background: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        transition: background 0.2s;
+    }
+
+    .download-btn:hover {
+        background: #0b5ed7;
+        color: #fff;
+    }
+</style>
+
+<!-- 🪟 Large Media Preview Modal -->
+<div class="modal fade" id="mediaPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Preview</h6>
+            </div>
+            <div class="modal-body text-center" id="mediaPreviewBody">
+                <div class="text-muted">Loading preview...</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDocument(url) {
+        window.open(url, '_blank');
+    }
+</script>
+<script>
+    function showMediaModal(url, type, extension) {
+        const modalBody = document.getElementById("mediaPreviewBody");
+        modalBody.innerHTML = ""; // Clear old content
+
+        // ✅ Ensure absolute URL (important!)
+        let absoluteUrl = url;
+        if (!url.startsWith("http")) {
+            absoluteUrl = window.location.origin + (url.startsWith("/") ? url : "/" + url);
+        }
+
+        if (type === "video") {
+            // 🧩 Render video preview safely
+            modalBody.innerHTML = `
+                <video id="videoPreviewPlayer"
+                       controls
+                       autoplay
+                       style="max-width:100%; max-height:70vh; border-radius:6px; background:#000;">
+                    <source src="${absoluteUrl}" type="video/${extension}">
+                    Your browser does not support the video tag.
+                </video>`;
+        }
+        else if (extension === "pdf") {
+            modalBody.innerHTML = `
+                <iframe src="${absoluteUrl}"
+                        style="width:100%; height:70vh; border:none;"
+                        title="PDF Preview"></iframe>`;
+        }
+        else {
+            modalBody.innerHTML = `
+                <iframe src="https://docs.google.com/gview?url=${absoluteUrl}&embedded=true"
+                        style="width:100%; height:70vh; border:none;"
+                        title="Document Preview"></iframe>`;
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('mediaPreviewModal'));
+        modal.show();
+    }
+</script>

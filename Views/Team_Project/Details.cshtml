@@ -1,0 +1,77 @@
+﻿@model Leave_Management_System.Models.Team_Project
+
+@{
+    ViewData["Title"] = "Details";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-info text-white text-center">
+                    <h4><i class="fas fa-eye"></i> Details</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Role Name -->
+                    <div class="mb-3">
+                        <label class="fw-bold">Role Name</label>
+                        <div class="form-control bg-light">
+                            @Model.Name
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label class="fw-bold">Status</label>
+                        <div class="form-control bg-light">
+                            @Model.Status
+                        </div>
+                    </div>
+
+                    <!-- Created Info -->
+                    <div class="mb-3">
+                        <label class="fw-bold">Created By</label>
+                        <div class="form-control bg-light">
+                            @Model.CreatedBy
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Created Date</label>
+                        <div class="form-control bg-light">
+                            @Model.CreatedDatetime.ToString("dd-MMM-yyyy hh:mm tt")
+                        </div>
+                    </div>
+
+                    <!-- Updated Info -->
+                    <div class="mb-3">
+                        <label class="fw-bold">Updated By</label>
+                        <div class="form-control bg-light">
+                            @Model.UpdatedBy
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold">Updated Date</label>
+                        <div class="form-control bg-light">
+                            @Model.UpdatedDatetime.ToString("dd-MMM-yyyy hh:mm tt")
+                        </div>
+                    </div>                
+
+                </div>
+
+                <div class="card-footer text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+               
+  
