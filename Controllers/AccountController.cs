@@ -42,7 +42,7 @@ namespace Leave_Management_System.Controllers
 
                 if (user != null)
                 {
-                    var result = _passwordHasher.VerifyHashedPassword(user,user.Password,model.Password);
+                    var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
 
                     if (result == PasswordVerificationResult.Success)
                     {
@@ -52,6 +52,49 @@ namespace Leave_Management_System.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
+
+                //if (user != null)
+                //{
+                //    bool passwordValid = false;
+
+                //    // First try the secure hashed password
+                //    if (user.Password.StartsWith("AQAAAA"))
+                //    {
+                //        var result = _passwordHasher.VerifyHashedPassword(
+                //            user,
+                //            user.Password,
+                //            model.Password
+                //        );
+
+                //        passwordValid = result == PasswordVerificationResult.Success;
+                //    }
+                //    // Temporary fallback for old plaintext password
+                //    else
+                //    {
+                //        passwordValid = user.Password == model.Password;
+
+                //        // If correct, immediately upgrade it to a hash
+                //        if (passwordValid)
+                //        {
+                //            user.Password = _passwordHasher.HashPassword(
+                //                user,
+                //                model.Password
+                //            );
+
+                //            await _db.SaveChangesAsync();
+                //        }
+                //    }
+
+                //    if (passwordValid)
+                //    {
+                //        HttpContext.Session.SetString("UserName", user.Name);
+                //        HttpContext.Session.SetInt32("UserId", user.Id);
+
+                //        return RedirectToAction("Index", "Home");
+                //    }
+                //}
+
+
 
                 ModelState.AddModelError(string.Empty, "Invalid User ID or Password");
             }
