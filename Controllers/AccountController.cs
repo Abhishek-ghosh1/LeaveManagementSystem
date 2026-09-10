@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Identity;
 
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+
 namespace Leave_Management_System.Controllers
 {
     public class AccountController : BaseController
@@ -24,7 +28,9 @@ namespace Leave_Management_System.Controllers
         public IActionResult Login()
         {
             // Check if user is already logged in
-            if (HttpContext.Session.GetString("UserId") != null)
+           // if (HttpContext.Session.GetInt32("UserId") != null)
+                // Check if user is already authenticated
+            if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -46,8 +52,20 @@ namespace Leave_Management_System.Controllers
 
                     if (result == PasswordVerificationResult.Success)
                     {
-                        HttpContext.Session.SetString("UserName", user.Name);
-                        HttpContext.Session.SetInt32("UserId", user.Id);
+                        //HttpContext.Session.SetString("UserName", user.Name);
+                        //HttpContext.Session.SetInt32("UserId", user.Id);
+
+                        var claims = new List<Claim>
+                                            {
+                                                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                                                new Claim(ClaimTypes.Name, user.Name)
+                                            };
+
+                        var identity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
+
+                        var principal = new ClaimsPrincipal(identity);
+
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,principal);
 
                         return RedirectToAction("Index", "Home");
                     }
@@ -102,9 +120,13 @@ namespace Leave_Management_System.Controllers
             return View(model);
         }
 
-        public IActionResult Logout()
+        //public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
+            // HttpContext.Session.Clear();
+            await HttpContext.SignOutAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme);
+
             return RedirectToAction("Login");
         }
     }

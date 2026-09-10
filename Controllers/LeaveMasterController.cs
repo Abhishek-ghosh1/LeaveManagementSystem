@@ -1,6 +1,5 @@
 ﻿using Leave_Management_System.Data;
 using Leave_Management_System.Models;
-using Leave_Management_System.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    [SessionAuth]
+    //[SessionAuth]
+    [Authorize]
+
     public class LeaveMasterController : BaseController
     {
         private readonly ApplicationDbContext _db;
@@ -88,15 +90,16 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LeaveMaster model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             try
             {
-                model.CreatedBy = userId.Value;
+                model.CreatedBy = userId;
                 model.CreatedDatetime = DateTime.Now;
                 model.Status = "ACTIVE";
 
@@ -148,10 +151,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(LeaveMaster model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -167,7 +171,7 @@ namespace Leave_Management_System.Controllers
                 existing.LeaveName = model.LeaveName;
                 existing.Status = model.Status;
 
-                existing.UpdatedBy = userId.Value;
+                existing.UpdatedBy = userId;
                 existing.UpdatedDatetime = DateTime.Now;
 
                 _db.LeaveMaster.Update(existing);
@@ -229,10 +233,11 @@ namespace Leave_Management_System.Controllers
         public async Task<IActionResult> Delete(string id)
         {
 
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             try

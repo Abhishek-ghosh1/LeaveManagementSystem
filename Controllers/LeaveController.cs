@@ -1,6 +1,5 @@
-﻿using Leave_Management_System.Data;
+using Leave_Management_System.Data;
 using Leave_Management_System.Models;
-using Leave_Management_System.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    [SessionAuth]
+    //[SessionAuth]
+    [Authorize]
     public class LeaveController : BaseController
     {
         private readonly ApplicationDbContext _db;
@@ -169,10 +170,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Leave model, List<IFormFile> PDFFile, List<IFormFile> OtherDocs, string submitType = "submit")
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             await using var transaction = await _db.Database.BeginTransactionAsync();
@@ -261,7 +263,7 @@ namespace Leave_Management_System.Controllers
 
                     //Insert Into Desired Flow
 
-                    var (IsDesiredFlowInserted, errorMessage) = await InsertDesiredFlow(model.Id, userId.Value);
+                    var (IsDesiredFlowInserted, errorMessage) = await InsertDesiredFlow(model.Id, userId);
 
                     if (!IsDesiredFlowInserted)
                     {
@@ -270,7 +272,7 @@ namespace Leave_Management_System.Controllers
                     }
 
                     //Insert First Level in LeaveObservationFlow
-                    var (IsFirstLevelInserted, firstLevelErrorMessage) = await InsertFirstLevelToObservationFlow(model.Id, userId.Value);
+                    var (IsFirstLevelInserted, firstLevelErrorMessage) = await InsertFirstLevelToObservationFlow(model.Id, userId);
 
                     if (!IsFirstLevelInserted)
                     {
@@ -350,9 +352,12 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, Leave model, List<IFormFile> PDFFile, List<IFormFile> OtherDocs, string submitType = "submit")
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-                return RedirectToAction("Login", "Account");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
 
             await using var transaction = await _db.Database.BeginTransactionAsync();
             try
@@ -428,7 +433,7 @@ namespace Leave_Management_System.Controllers
                 {  
                     //Insert Into Desired Flow
 
-                    var (IsDesiredFlowInserted, errorMessage) = await InsertDesiredFlow(Leave.Id, userId.Value);
+                    var (IsDesiredFlowInserted, errorMessage) = await InsertDesiredFlow(Leave.Id, userId);
 
                     if (!IsDesiredFlowInserted)
                     {
@@ -437,7 +442,7 @@ namespace Leave_Management_System.Controllers
                     }
 
                     //Insert First Level in LeaveObservationFlow
-                    var (IsFirstLevelInserted, firstLevelErrorMessage) = await InsertFirstLevelToObservationFlow(Leave.Id, userId.Value);
+                    var (IsFirstLevelInserted, firstLevelErrorMessage) = await InsertFirstLevelToObservationFlow(Leave.Id, userId);
 
                     if (!IsFirstLevelInserted)
                     {
@@ -599,9 +604,12 @@ namespace Leave_Management_System.Controllers
         [HttpPost]
         public async Task<IActionResult> ApproveLeave(int LeaveId, int ObservationFlowId, int CurrentUserId, string Status_to, string ActionTaken, IFormFile Document)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-                return RedirectToAction("Login", "Account");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized();
+            }
 
             await using var transaction = await _db.Database.BeginTransactionAsync();
             try
@@ -772,7 +780,9 @@ namespace Leave_Management_System.Controllers
             var leaveReasonname = await _db.LeaveMaster.FirstOrDefaultAsync(m => m.Id == Leave.LeaveReasonId);
 
             // Get current logged-in user
-            int? currentUserId = HttpContext.Session.GetInt32("UserId");
+
+            int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
             var currentUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
 
             // Get pending LeaveObservationFlow for this leave
@@ -818,11 +828,13 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
+
             if (string.IsNullOrEmpty(id))
             {
                 return NotFound();

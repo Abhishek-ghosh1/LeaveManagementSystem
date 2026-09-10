@@ -1,3 +1,4 @@
+@model DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -11,19 +12,66 @@
                 <div class="info-box-content">
                     <span class="info-box-text">Total Users</span>
                     <span class="info-box-number">
-                        24
+                        @Model.TotalUsers
                         <small>users</small>
                     </span>
                 </div>
             </div>
         </div>
+
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-info elevation-1">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total No. of Leave</span>
+                    <span class="info-box-number">
+                         @Model.TotalLeaves 
+                        <small>leaves</small>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-success elevation-1">
+                    <i class="fas fa-calendar-check"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total No. of Leave Used</span>
+                    <span class="info-box-number">
+                       @*  @Model.TotalLeavesUsed *@
+                        <small>leaves</small>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="info-box">
+                <span class="info-box-icon bg-warning elevation-1">
+                    <i class="fas fa-calendar-day"></i>
+                </span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total No. of Leave Left</span>
+                    <span class="info-box-number">
+                       @*  @Model.TotalLeavesLeft *@
+                        <small>leaves</small>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+
         <div class="col-12 col-sm-6 col-md-3">
             <div class="info-box">
                 <span class="info-box-icon bg-success elevation-1"><i class="fas fa-calendar-check"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Approved Leaves</span>
                     <span class="info-box-number">
-                        12
+                        @Model.ApprovedLeaves
                         <small>leaves</small>
                     </span>
                 </div>
@@ -35,7 +83,7 @@
                 <div class="info-box-content">
                     <span class="info-box-text">Pending Leaves</span>
                     <span class="info-box-number">
-                        5
+                        @Model.PendingLeaves
                         <small>leaves</small>
                     </span>
                 </div>
@@ -47,7 +95,7 @@
                 <div class="info-box-content">
                     <span class="info-box-text">Rejected Leaves</span>
                     <span class="info-box-number">
-                        2
+                        @Model.RejectedLeaves
                         <small>leaves</small>
                     </span>
                 </div>
@@ -61,7 +109,7 @@
             <h3 class="card-title">Welcome to Leave Management System</h3>
         </div>
         <div class="card-body">
-            <p>Hello <strong>@ViewBag.UserName</strong>! Welcome to the Leave Management System.</p>
+            <p>Hello <strong>@Model.UserName</strong>! Welcome to the Leave Management System.</p>
             <p>Use the sidebar navigation to manage users and leave requests.</p>
         </div>
     </div>
@@ -82,36 +130,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>John Smith</td>
-                        <td>Sick Leave</td>
-                        <td><span class="badge badge-success">Approved</span></td>
-                        <td>Jun 3, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>Sarah Johnson</td>
-                        <td>Annual Leave</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
-                        <td>Jun 4, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>Mike Wilson</td>
-                        <td>Personal Leave</td>
-                        <td><span class="badge badge-success">Approved</span></td>
-                        <td>Jun 2, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>Emily Davis</td>
-                        <td>Sick Leave</td>
-                        <td><span class="badge badge-danger">Rejected</span></td>
-                        <td>Jun 1, 2026</td>
-                    </tr>
-                    <tr>
-                        <td>David Brown</td>
-                        <td>Annual Leave</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
-                        <td>Jun 5, 2026</td>
-                    </tr>
+                    
                 </tbody>
             </table>
         </div>

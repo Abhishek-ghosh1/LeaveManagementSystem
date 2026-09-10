@@ -1,17 +1,20 @@
 ﻿using Leave_Management_System.Data;
 using Leave_Management_System.Models;
-using Leave_Management_System.Attributes;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Identity;
 
 namespace Leave_Management_System.Controllers
 {
-    [SessionAuth]
+    //[SessionAuth]
+    [Authorize]
+
     public class UsersController : BaseController
     {
         private readonly ApplicationDbContext _db;
@@ -106,10 +109,17 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Users model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
+            //int? userId = HttpContext.Session.GetInt32("UserId");
+            //if (userId == null)
+            //{
+            //    return RedirectToAction("Login", "Account");
+            //}
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -120,8 +130,8 @@ namespace Leave_Management_System.Controllers
                 {
                     model.Team_ProjectId = string.Join(",", model.Team_ProjectIds);
                 }
-
-                model.CreatedBy = userId.Value;
+                model.TotalNoofLeaves = model.TotalNoofLeaves;
+                model.CreatedBy = Convert.ToInt32(userId);
                 model.CreatedDatetime = DateTime.Now;
                 model.Status = model.Status ?? "ACTIVE";
                 model.Password = _passwordHasher.HashPassword(model, model.Password);
@@ -195,12 +205,13 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int Id, Users model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
+            
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
-
             using var transaction = await _db.Database.BeginTransactionAsync();
 
             try
@@ -216,7 +227,7 @@ namespace Leave_Management_System.Controllers
                 {
                     user.Team_ProjectId = null;
                 }
-
+                user.TotalNoofLeaves = model.TotalNoofLeaves;
                 user.Name = model.Name;
                 user.PinNo = model.PinNo;
                 user.Status = model.Status;
@@ -229,7 +240,7 @@ namespace Leave_Management_System.Controllers
 
                 }
 
-                user.UpdatedBy = userId.Value;
+                user.UpdatedBy = Convert.ToInt32(userId);
                 user.UpdatedDatetime = DateTime.Now;
 
                 _db.Users.Update(user);
@@ -303,10 +314,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (userId == null)
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             try

@@ -1,15 +1,18 @@
 ﻿using Leave_Management_System.Data;
 using Leave_Management_System.Models;
-using Leave_Management_System.Attributes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    [SessionAuth]
+    //[SessionAuth]
+    [Authorize]
+
     public class Team_ProjectController : BaseController
     {
         private readonly ApplicationDbContext _db;
@@ -83,15 +86,16 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Team_Project model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             try
             {
-                model.CreatedBy = userId.Value;
+                model.CreatedBy = userId;
                 model.CreatedDatetime = DateTime.Now;
                 model.Status = "ACTIVE";
 
@@ -142,10 +146,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Team_Project model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -161,7 +166,7 @@ namespace Leave_Management_System.Controllers
                 existing.Name = model.Name;
                 existing.Status = model.Status;
 
-                existing.UpdatedBy = userId.Value;
+                existing.UpdatedBy = userId;
                 existing.UpdatedDatetime = DateTime.Now;
            
                 _db.Team_Project.Update(existing);

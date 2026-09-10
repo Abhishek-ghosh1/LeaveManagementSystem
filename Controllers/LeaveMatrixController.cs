@@ -1,16 +1,19 @@
 ﻿using Leave_Management_System.Data;
 using Leave_Management_System.Models;
-using Leave_Management_System.Attributes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Leave_Management_System.Controllers
 {
-    [SessionAuth]
+    //[SessionAuth]
+    [Authorize]
+
     public class LeaveMatrixController : BaseController
     {
 
@@ -177,10 +180,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LeaveMatrix leavematrix, int RoleMasterId)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             try
@@ -196,7 +200,7 @@ namespace Leave_Management_System.Controllers
                     }
 
                     leavematrix.RoleMasterId = RoleMasterId;
-                    leavematrix.CreatedBy = userId.Value;
+                    leavematrix.CreatedBy = userId;
                     leavematrix.CreatedDatetime = DateTime.Now;
                     leavematrix.Status = "ACTIVE";
 
@@ -264,10 +268,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(LeaveMatrix model)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -284,7 +289,7 @@ namespace Leave_Management_System.Controllers
                     matrixedit.ToRole = model.ToRole;
                     matrixedit.Status = model.Status;
                
-                    matrixedit.UpdatedBy = userId.Value;
+                    matrixedit.UpdatedBy = userId;
                     matrixedit.UpdatedDatetime = DateTime.Now;
 
                     _db.LeaveMatrix.Update(matrixedit);
@@ -361,10 +366,11 @@ namespace Leave_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(string id)
         {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(userIdClaim, out int userId))
             {
-                return RedirectToAction("Login", "Account");
+                return Unauthorized();
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();

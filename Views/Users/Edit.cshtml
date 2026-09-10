@@ -26,6 +26,12 @@
                     <input asp-for="PinNo" class="form-control req" />
                 </div>
 
+                <div class="form-group mb-3">
+                    <label>Total No. Of Leaves </label>
+                    <input asp-for="TotalNoofLeaves" class="form-control req" />
+                </div>
+
+
                 <div class="form-group">
                     <label>Team/Project</label>
                     <select asp-for="Team_ProjectIds" class="form-control req select2" data-error="Required" asp-items="Model.Team_Projects" multiple>
