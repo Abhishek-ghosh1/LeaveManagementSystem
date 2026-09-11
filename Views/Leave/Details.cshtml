@@ -24,10 +24,10 @@
 
             var Status = Model.Leave.Status;
 
-            if (Status == "ACTIVE" && Model.PendingFlow != null)
+            if (Status == "ACTIVE" && !string.IsNullOrEmpty(Model.PendingApproverNames))
             {
                 pendingWithClass = "is-invalid";
-                pendingWithMsg = $"Pending With {(Model.PendingFlow?.Users?.Name ?? "Unknown User")} ({Model.PendingFlow?.RoleMaster?.RoleName ?? "Unknown Role"})";
+                pendingWithMsg = $"Pending With {Model.PendingApproverNames}";
             }
             else if (Status == "Approved")
             {
@@ -240,9 +240,13 @@
     foreach (var flow in Model.LeaveFlows)
     {
         var ColorCode = "primary";
-        if (flow.Status == "Approved")
+        if (flow.Status == "Approved" && flow.MannualEntry == 1)
         {
             ColorCode = "success";
+        }
+        else if (flow.Status == "Action Taken By Another Responsible Person")
+        {
+            ColorCode = "info";
         }
         else if (flow.Status == "Pending")
         {
@@ -305,9 +309,9 @@
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Action Taken By</label>
-                                        @if (flow.UpdatedBy == null)
+                                        @if (flow.UpdatedBy == null && flow.Status_to != "N")
                                         {
-                                            <input type="text" class="form-control" value="Auto Forwarded by System" readonly />
+                                            <input type="text" class="form-control" value="Action Taken By Another Responsible Person" readonly />
                                         }
                                         else if (flow.UpdatedBy == flow.UserId)
                                         {
@@ -412,7 +416,7 @@
     <button class="btn btn-primary btn-block mt-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="true" aria-controls="collapseExample2">
         <div class="d-flex flex-row">
             <span class="mr-2">Pending with</span>
-            <span class="mr-2">@(pendingFlow?.Users?.Name ?? Model.CurrentUserName) (@(pendingFlow?.RoleMaster?.RoleName ?? "Unknown Role"))</span>
+            <span class="mr-2">@Model.CurrentUserName (@Model.CurrentUserRole)</span>
         </div>
     </button>
 

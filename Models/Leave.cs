@@ -27,9 +27,10 @@ namespace Leave_Management_System.Models
         public LeaveMaster LeaveMaster { get; set; }
 
         public string LeaveDescription { get; set; }
-   
-        public DateTime StartDate { get; set; }
-        public DateTime JoinDate { get; set; }
+
+        public DateTime StartDate { get; set; } = DateTime.Now;
+        public DateTime JoinDate { get; set; } = DateTime.Now;
+        public int NoofLeaves { get; set; }
         public string? UploadPDFFile { get; set; }
 
         public string? OtherRelatedDocs { get; set; }

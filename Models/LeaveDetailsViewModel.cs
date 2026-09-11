@@ -8,7 +8,9 @@ namespace Leave_Management_System.Models
         public Leave Leave { get; set; }
         public int? CurrentUserId { get; set; }
         public string CurrentUserName { get; set; }
+        public string CurrentUserRole { get; set; }
         public LeaveObservationFlow PendingFlow { get; set; }
+        public string PendingApproverNames { get; set; }
         public bool IsPendingApprover { get; set; }
         public string CreatedBy { get; set; }
         public string UpdatedBy { get; set; }

@@ -27,8 +27,7 @@ namespace Leave_Management_System.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // Check if user is already logged in
-           // if (HttpContext.Session.GetInt32("UserId") != null)
+           
                 // Check if user is already authenticated
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -44,6 +43,7 @@ namespace Leave_Management_System.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _db.Users
+                    .Include(u => u.RoleMaster)
                     .FirstOrDefaultAsync(u => u.PinNo == model.PinNo && u.Status == "ACTIVE");
 
                 if (user != null)
@@ -52,13 +52,12 @@ namespace Leave_Management_System.Controllers
 
                     if (result == PasswordVerificationResult.Success)
                     {
-                        //HttpContext.Session.SetString("UserName", user.Name);
-                        //HttpContext.Session.SetInt32("UserId", user.Id);
-
+                        
                         var claims = new List<Claim>
                                             {
                                                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                                                new Claim(ClaimTypes.Name, user.Name)
+                                                new Claim(ClaimTypes.Name, user.Name),
+                                                new Claim(ClaimTypes.Role, user.RoleMaster?.RoleName ?? "Unknown")
                                             };
 
                         var identity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
@@ -70,49 +69,6 @@ namespace Leave_Management_System.Controllers
                         return RedirectToAction("Index", "Home");
                     }
                 }
-
-                //if (user != null)
-                //{
-                //    bool passwordValid = false;
-
-                //    // First try the secure hashed password
-                //    if (user.Password.StartsWith("AQAAAA"))
-                //    {
-                //        var result = _passwordHasher.VerifyHashedPassword(
-                //            user,
-                //            user.Password,
-                //            model.Password
-                //        );
-
-                //        passwordValid = result == PasswordVerificationResult.Success;
-                //    }
-                //    // Temporary fallback for old plaintext password
-                //    else
-                //    {
-                //        passwordValid = user.Password == model.Password;
-
-                //        // If correct, immediately upgrade it to a hash
-                //        if (passwordValid)
-                //        {
-                //            user.Password = _passwordHasher.HashPassword(
-                //                user,
-                //                model.Password
-                //            );
-
-                //            await _db.SaveChangesAsync();
-                //        }
-                //    }
-
-                //    if (passwordValid)
-                //    {
-                //        HttpContext.Session.SetString("UserName", user.Name);
-                //        HttpContext.Session.SetInt32("UserId", user.Id);
-
-                //        return RedirectToAction("Index", "Home");
-                //    }
-                //}
-
-
 
                 ModelState.AddModelError(string.Empty, "Invalid User ID or Password");
             }

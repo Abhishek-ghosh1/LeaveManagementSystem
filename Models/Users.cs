@@ -12,6 +12,8 @@ namespace Leave_Management_System.Models
         public string Name { get; set; }
 
         public int RoleId { get; set; }
+        [ForeignKey("RoleId")]
+        public RoleMaster RoleMaster { get; set; }
         public string PinNo { get; set; }
         public string Password { get; set; }
       
@@ -25,9 +27,6 @@ namespace Leave_Management_System.Models
         public int? UsedLeaves { get; set; }
 
         public int? LeftLeaves { get; set; }
-
-        public int? LeaveSpendingForApproval { get; set; }
-
         public int CreatedBy { get; set; }
         public DateTime CreatedDatetime { get; set; }
 

@@ -111,7 +111,7 @@ namespace Leave_Management_System.Controllers
                 Id = x.Id,
                 // Simple pending with - get users for this leave
                 pendingWith = string.Join(" ", _db.LeaveObservationFlow
-    .Where(lo => lo.LeaveId == x.LeaveId && lo.Status == "Pending")
+    .Where(lo => lo.LeaveId == x.LeaveId && lo.Status == "Pending" && lo.Status_to == "N")
     .Select(lo => new
     {
         UserName = _db.Users
@@ -180,6 +180,43 @@ namespace Leave_Management_System.Controllers
             await using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
+                //Cal the no of days of leave 
+
+                int noofleaveuserneeds = (model.JoinDate.Date - model.StartDate.Date).Days;
+
+                if (noofleaveuserneeds <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Joining Date must be greater than or equal to Start Date."
+                    });
+                }
+               
+                var userleavedata = await _db.Users.FirstOrDefaultAsync(x => x.Id == model.EmpUserID);
+
+                if (userleavedata == null)
+                {
+                    return Json(new { success = false, message = "User Data not found." });
+                }
+
+                int totalLeaves = userleavedata.TotalNoofLeaves ?? 0;
+                int usedLeaves = userleavedata.UsedLeaves ?? 0;
+                int leftLeaves = userleavedata.LeftLeaves ?? totalLeaves;
+
+                // --------------------------------------------------
+                // 3. Check whether employee has enough leaves
+                // --------------------------------------------------
+                if (leftLeaves < noofleaveuserneeds)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"You have only {leftLeaves} leave(s) left."
+                    });
+                }
+
+                model.NoofLeaves = noofleaveuserneeds;
                 // Set draft status based on submit type
                 model.IsDraft = submitType == "draft" ? "Yes" : "No";
               
@@ -279,8 +316,14 @@ namespace Leave_Management_System.Controllers
                         await transaction.RollbackAsync();
                         return Json(new { success = false, message = firstLevelErrorMessage });
                     }
+                  
+                }
 
-                }            
+                userleavedata.LeftLeaves = leftLeaves - noofleaveuserneeds;
+                userleavedata.UsedLeaves = usedLeaves + noofleaveuserneeds;
+
+                _db.Users.Update(userleavedata);
+                await _db.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -499,9 +542,12 @@ namespace Leave_Management_System.Controllers
 
                 foreach (var item in matrixdata)
                 {
+                  
+                    var project_teamIds = userdata.Team_ProjectId?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                         .ToList() ?? new List<string>();
+
                     var users = await _db.Users
-                        .Where(x => x.RoleId == item.ToRole
-                                 && x.Team_ProjectId == userdata.Team_ProjectId)
+                        .Where(x => x.RoleId == item.ToRole && project_teamIds.Any(id => x.Team_ProjectId.Contains(id)))
                         .ToListAsync();
 
                     if (!users.Any())
@@ -560,29 +606,31 @@ namespace Leave_Management_System.Controllers
                 // Get the first level from LeaveObservationDesiredFlow
                 var firstLevelDesiredFlow = await _db.LeaveObservationDesiredFlow
                     .Where(x => x.LeaveId == LeaveId && x.Level == 1)
-                    .FirstOrDefaultAsync();
+                    .ToListAsync();
 
                 if (firstLevelDesiredFlow == null)
                 {
                     return (false, "No first level found in desired flow.");
                 }
 
-                // Insert into LeaveObservationFlow
-                LeaveObservationFlow observationFlow = new LeaveObservationFlow
+                foreach (var users in firstLevelDesiredFlow)
                 {
-                    LeaveId = LeaveId,
-                    LeaveObservationDesiredFlowId = firstLevelDesiredFlow.Id,
-                    RoleId = firstLevelDesiredFlow.RoleId,
-                    UserId = firstLevelDesiredFlow.UserId,
-                    Level = firstLevelDesiredFlow.Level,
-                    Status = "Pending",
-                    Status_to = "N",
-                    ActionTakenDatetime = DateTime.Now,
-                    CreatedDatetime = DateTime.Now,
-                    MannualEntry = 0
-                };
-
-                await _db.LeaveObservationFlow.AddAsync(observationFlow);
+                    // Insert into LeaveObservationFlow
+                    var observationFlow = new LeaveObservationFlow
+                    {
+                        LeaveId = LeaveId,
+                        LeaveObservationDesiredFlowId = users.Id,
+                        RoleId = users.RoleId,
+                        UserId = users.UserId,
+                        Level = users.Level,
+                        Status = "Pending",
+                        Status_to = "N",
+                        CreatedDatetime = DateTime.Now,
+                        MannualEntry = 0
+                    };
+                    await _db.LeaveObservationFlow.AddAsync(observationFlow);
+                }
+                      
                 await _db.SaveChangesAsync();
 
                 return (true, "");
@@ -650,13 +698,29 @@ namespace Leave_Management_System.Controllers
 
                 // Update observation flow
                 observationFlow.Status = Status_to == "Approved" ? "Approved" : "Rejected";
-                observationFlow.Status_to = Status_to;
+                observationFlow.Status_to = "Y";
                 observationFlow.ActionTaken = ActionTaken;
                 observationFlow.ActionTakenDatetime = DateTime.Now;
                 observationFlow.Document = documentPath;
                 observationFlow.UpdatedBy = userId;
-
+                observationFlow.MannualEntry = 1;
+              
                 _db.LeaveObservationFlow.Update(observationFlow);
+
+                // Mark remaining users at the same level as completed
+                var otherFlows = await _db.LeaveObservationFlow
+                    .Where(x => x.LeaveId == LeaveId
+                             && x.Level == observationFlow.Level
+                             && x.Id != observationFlow.Id
+                             && x.Status_to == "N")
+                    .ToListAsync();
+
+                foreach (var flow in otherFlows)
+                {
+                    flow.Status_to = "Y";
+                    flow.Status = "Action Taken By Another Responsible Person";
+                }
+
                 await _db.SaveChangesAsync();
 
                 // If approved, move to next level
@@ -664,25 +728,29 @@ namespace Leave_Management_System.Controllers
                 {
                     var nextLevelFlow = await _db.LeaveObservationDesiredFlow
                         .Where(x => x.LeaveId == LeaveId && x.Level == observationFlow.Level + 1)
-                        .FirstOrDefaultAsync();
+                        .ToListAsync();
 
-                    if (nextLevelFlow != null)
+                    if (nextLevelFlow != null && nextLevelFlow.Any())
                     {
-                        // Insert next level into LeaveObservationFlow
-                        LeaveObservationFlow nextObservationFlow = new LeaveObservationFlow
+                        foreach (var users in nextLevelFlow)
                         {
-                            LeaveId = LeaveId,
-                            LeaveObservationDesiredFlowId = nextLevelFlow.Id,
-                            RoleId = nextLevelFlow.RoleId,
-                            UserId = nextLevelFlow.UserId,
-                            Level = nextLevelFlow.Level,
-                            Status = "Pending",
-                            Status_to = "N",
-                            CreatedDatetime = DateTime.Now,
-                            MannualEntry = 1
-                        };
+                            // Insert next level into LeaveObservationFlow
+                            var  nextObservationFlow = new LeaveObservationFlow
+                            {
+                                LeaveId = LeaveId,
+                                LeaveObservationDesiredFlowId = users.Id,
+                                RoleId = users.RoleId,
+                                UserId = users.UserId,
+                                Level = users.Level,
+                                Status = "Pending",
+                                Status_to = "N",
+                                CreatedDatetime = DateTime.Now,
+                                MannualEntry = 0
+                            };
+                            await _db.LeaveObservationFlow.AddAsync(nextObservationFlow);
 
-                        await _db.LeaveObservationFlow.AddAsync(nextObservationFlow);
+                        }
+
                         await _db.SaveChangesAsync();
                     }
                     else
@@ -783,18 +851,28 @@ namespace Leave_Management_System.Controllers
 
             int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            var currentUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+            var currentUser = await _db.Users
+                .Include(u => u.RoleMaster)
+                .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+            // Get current user's role from database or claims
+            var currentUserRole = currentUser?.RoleMaster?.RoleName ?? User.FindFirstValue(ClaimTypes.Role) ?? "Unknown Role";
 
             // Get pending LeaveObservationFlow for this leave
-            var pendingFlow = await _db.LeaveObservationFlow
+            var pendingFlows = await _db.LeaveObservationFlow
                 .Include(x => x.Users)
                 .Include(x => x.RoleMaster)
-                .Where(x => x.LeaveId == decryptedId && x.Status == "Pending")
+                .Where(x => x.LeaveId == decryptedId && x.Status == "Pending" && x.Status_to == "N")
                 .OrderBy(x => x.Level)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
+
+            // Create comma-separated names of pending approvers
+            var pendingApproverNames = pendingFlows != null && pendingFlows.Any()
+                ? string.Join(", ", pendingFlows.Select(f => $"{f.Users?.Name ?? "Unknown"} ({f.RoleMaster?.RoleName ?? "Unknown Role"})"))
+                : "";
 
             // Check if current user is the pending approver
-            bool isPendingApprover = pendingFlow != null && pendingFlow.UserId == currentUserId;
+            bool isPendingApprover = pendingFlows != null && pendingFlows.Any(f => f.UserId == currentUserId);
 
             // Get all LeaveObservationFlow for this leave
             var leaveFlows = await _db.LeaveObservationFlow
@@ -812,7 +890,9 @@ namespace Leave_Management_System.Controllers
                 Leave = Leave,
                 CurrentUserId = currentUserId,
                 CurrentUserName = currentUser?.Name ?? "Unknown",
-                PendingFlow = pendingFlow,
+                CurrentUserRole = currentUserRole,
+                PendingFlow = pendingFlows?.FirstOrDefault(),
+                PendingApproverNames = pendingApproverNames,
                 IsPendingApprover = isPendingApprover,
                 CreatedBy = createdByUser?.Name ?? "Not Updated",
                 UpdatedBy = updatedByUser?.Name ?? "Not Updated",
@@ -857,6 +937,21 @@ namespace Leave_Management_System.Controllers
 
             try
             {
+                //Undo the Leave Calculation 
+                var userleavedata = await _db.Users.FirstOrDefaultAsync(x => x.Id == Leave.EmpUserID);
+
+                if (userleavedata == null)
+                {
+                    return Json(new { success = false, message = "User Data not found" });
+                }
+
+                userleavedata.UsedLeaves = userleavedata.UsedLeaves - Leave.NoofLeaves;
+                userleavedata.LeftLeaves = userleavedata.LeftLeaves + Leave.NoofLeaves;
+
+                _db.Users.Update(userleavedata);
+
+                await _db.SaveChangesAsync();
+
                 // Delete related LeaveObservationFlow records
                 var leaveObservationFlows = await _db.LeaveObservationFlow
                     .Where(x => x.LeaveId == decryptedId)
