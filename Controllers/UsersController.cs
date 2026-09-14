@@ -1,11 +1,13 @@
 ﻿using Leave_Management_System.Data;
 using Leave_Management_System.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -48,7 +50,9 @@ namespace Leave_Management_System.Controllers
             var query = _db.Users.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchName))
-                query = query.Where(x => x.Name.ToLower().Contains(searchName));
+                query = query.Where(x => x.Name.ToLower().Contains(searchName) ||
+                                        (x.ContactNo != null && x.ContactNo.ToString().Contains(searchName)) ||
+                                        (x.Email != null && x.Email.ToLower().Contains(searchName)));
 
             if (!string.IsNullOrEmpty(searchUserId))
                 query = query.Where(x => x.PinNo.ToLower().Contains(searchUserId));
@@ -67,6 +71,8 @@ namespace Leave_Management_System.Controllers
                 {
                     SerialNo = skip + i + 1,
                     Name = x.Name,
+                    ContactNo = x.ContactNo,
+                    Email = x.Email,
                     PinNo = x.PinNo,
                     Status = x.Status == "ACTIVE"
                         ? "<span class='badge bg-success'>Active</span>"
@@ -107,14 +113,9 @@ namespace Leave_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Users model)
+        public async Task<IActionResult> Create(Users model, IFormFile ProfilePic)
         {
-            //int? userId = HttpContext.Session.GetInt32("UserId");
-            //if (userId == null)
-            //{
-            //    return RedirectToAction("Login", "Account");
-            //}
-
+           
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
@@ -131,10 +132,38 @@ namespace Leave_Management_System.Controllers
                     model.Team_ProjectId = string.Join(",", model.Team_ProjectIds);
                 }
                 model.TotalNoofLeaves = model.TotalNoofLeaves;
+                model.ContactNo = model.ContactNo;
+                model.Email = model.Email;
+                model.Address = model.Address;
                 model.CreatedBy = Convert.ToInt32(userId);
                 model.CreatedDatetime = DateTime.Now;
                 model.Status = model.Status ?? "ACTIVE";
                 model.Password = _passwordHasher.HashPassword(model, model.Password);
+
+                // Handle image upload
+                if (ProfilePic != null && ProfilePic.Length > 0)
+                {
+                    string[] allowedImageExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
+                    string ext = Path.GetExtension(ProfilePic.FileName).ToLower();
+                    
+                    if (!allowedImageExtensions.Contains(ext))
+                    {
+                        return Json(new { success = false, message = $"Invalid file type '{ext}'. Only images (.jpg, .jpeg, .png, .gif) are allowed." });
+                    }
+
+                    string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "Users");
+                    EnsureDirectoryExists(uploadFolder);
+
+                    var fileName = $"{GenerateRandomNumber()}{DateTime.Now:yyyyMMddHHmmssfff}_UserImage{ext}";
+                    var filePath = Path.Combine(uploadFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ProfilePic.CopyToAsync(stream);
+                    }
+
+                    model.Image = fileName;
+                }
 
                 _db.Users.Add(model);
                 await _db.SaveChangesAsync();
@@ -203,7 +232,7 @@ namespace Leave_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int Id, Users model)
+        public async Task<IActionResult> Edit(int Id, Users model, IFormFile ProfilePicFile)
         {
             
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -230,6 +259,9 @@ namespace Leave_Management_System.Controllers
                 user.TotalNoofLeaves = model.TotalNoofLeaves;
                 user.Name = model.Name;
                 user.PinNo = model.PinNo;
+                user.ContactNo = model.ContactNo;
+                user.Email = model.Email;
+                user.Address = model.Address;
                 user.Status = model.Status;
                
                 user.RoleId = model.RoleId;
@@ -238,6 +270,31 @@ namespace Leave_Management_System.Controllers
                 {
                     user.Password = _passwordHasher.HashPassword(model,model.Password);
 
+                }
+
+                // Handle image upload
+                if (ProfilePicFile != null && ProfilePicFile.Length > 0)
+                {
+                    string[] allowedImageExtensions = { ".jpg", ".jpeg", ".png", ".gif" };
+                    string ext = Path.GetExtension(ProfilePicFile.FileName).ToLower();
+                    
+                    if (!allowedImageExtensions.Contains(ext))
+                    {
+                        return Json(new { success = false, message = $"Invalid file type '{ext}'. Only images (.jpg, .jpeg, .png, .gif) are allowed." });
+                    }
+
+                    string uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "Users");
+                    EnsureDirectoryExists(uploadFolder);
+
+                    var fileName = $"{GenerateRandomNumber()}{DateTime.Now:yyyyMMddHHmmssfff}_UserImage{ext}";
+                    var filePath = Path.Combine(uploadFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ProfilePicFile.CopyToAsync(stream);
+                    }
+
+                    user.Image = fileName;
                 }
 
                 user.UpdatedBy = Convert.ToInt32(userId);
@@ -383,6 +440,20 @@ namespace Leave_Management_System.Controllers
             {
                 throw new InvalidOperationException("Error decrypting the string. Invalid format.", ex);
             }
+        }
+
+        private void EnsureDirectoryExists(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+        }
+
+        private string GenerateRandomNumber()
+        {
+            var random = new Random();
+            return random.Next(1000, 9999).ToString();
         }
     }
 }

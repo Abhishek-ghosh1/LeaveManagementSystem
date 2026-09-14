@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Leave Reports";
+}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <span class="h3">Leave Reports</span>
+        </div>
+
+        <div class="card-body">
+            <!-- Filter Section -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" id="startDate" class="form-control" 
+                           value="@(Model.StartDate?.ToString("yyyy-MM-dd") ?? "")" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" id="endDate" class="form-control" 
+                           value="@(Model.EndDate?.ToString("yyyy-MM-dd") ?? "")" />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="applyFilter()">
+                        <i class="fas fa-filter"></i> Apply Filter
+                    </button>
+                </div>
+            </div>        
+
+            <!-- Report Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Reference No</th>
+                            <th>Employee Name</th>
+                            <th>Leave Reason</th>
+                            <th>Start Date</th>
+                            <th>Join Date</th>
+                            <th>No. of Days</th>
+                            <th>Status</th>
+                            <th>Created By</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                   @*  <tbody>
+                        @if (Model.LeaveReports != null && Model.LeaveReports.Any())
+                        {
+                            @foreach (var (item, index) in Model.LeaveReports.Select((x, i) => (x, i)))
+                            {
+                                <tr>
+                                    <td>@(index + 1)</td>
+                                    <td>@item.ReferenceNo</td>
+                                    <td>@item.EmployeeName</td>
+                                    <td>@item.LeaveReason</td>
+                                    <td>@item.StartDate.ToString("dd-MMM-yyyy")</td>
+                                    <td>@item.JoinDate.ToString("dd-MMM-yyyy")</td>
+                                    <td>@item.NoofLeaves</td>
+                                    <td>
+                                        @if (item.Status == "Approved")
+                                        {
+                                            <span class="badge bg-success">@item.Status</span>
+                                        }
+                                        else if (item.Status == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">@item.Status</span>
+                                        }
+                                        else if (item.Status == "ACTIVE" || item.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning">@item.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.Status</span>
+                                        }
+                                    </td>
+                                    <td>@item.CreatedBy</td>
+                                    <td>@item.CreatedDatetime.ToString("dd-MMM-yyyy hh:mm tt")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center">No records found for the selected period.</td>
+                            </tr>
+                        }
+        
+                    </tbody> *@
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function applyFilter() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const url = new URL(window.location.href);
+            if (startDate) url.searchParams.set('startDate', startDate);
+            if (endDate) url.searchParams.set('endDate', endDate);
+
+            window.location.href = url.toString();
+        }
+    </script>
+}

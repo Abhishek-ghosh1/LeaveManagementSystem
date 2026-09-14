@@ -22,6 +22,14 @@ namespace Leave_Management_System.Models
 
         public string? Team_ProjectId { get; set; }
 
+        public string? Image { get; set; }
+
+        public string? ContactNo { get; set; }
+
+        public string? Email { get; set; }
+
+        public string? Address { get; set; }
+
         public int? TotalNoofLeaves { get; set; }
 
         public int? UsedLeaves { get; set; }

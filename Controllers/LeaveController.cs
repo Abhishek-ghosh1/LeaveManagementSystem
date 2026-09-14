@@ -405,9 +405,63 @@ namespace Leave_Management_System.Controllers
             await using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
+                //Cal the no of days of leave 
+
+                int noofleaveuserneeds = (model.JoinDate.Date - model.StartDate.Date).Days;
+
+                if (noofleaveuserneeds <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Joining Date must be greater than or equal to Start Date."
+                    });
+                }
+
+                var userleavedata = await _db.Users.FirstOrDefaultAsync(x => x.Id == model.EmpUserID);
+
+                if (userleavedata == null)
+                {
+                    return Json(new { success = false, message = "User Data not found." });
+                }
+
+                int totalLeaves = userleavedata.TotalNoofLeaves ?? 0;
+                int usedLeaves = userleavedata.UsedLeaves ?? 0;
+                int leftLeaves = userleavedata.LeftLeaves ?? totalLeaves;
+
+                // --------------------------------------------------
+                // 3. Check whether employee has enough leaves
+                // --------------------------------------------------
+                if (leftLeaves < noofleaveuserneeds)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"You have only {leftLeaves} leave(s) left."
+                    });
+                }
+
                 var Leave = await _db.Leave.FindAsync(Id);
                 if (Leave == null)
                     return Json(new { success = false, message = "Data not found." });
+
+                int oldnoofleave = Leave.NoofLeaves;
+                int newnoofleave = noofleaveuserneeds;
+
+                int difference = Math.Abs(oldnoofleave - newnoofleave);
+
+                if (newnoofleave > oldnoofleave)
+                {
+                    userleavedata.UsedLeaves += difference;
+                    userleavedata.LeftLeaves -= difference;
+                }
+                else 
+                {
+
+                    userleavedata.UsedLeaves -= difference;
+                    userleavedata.LeftLeaves += difference;
+
+                }
 
                 // Set draft status based on submit type
                 Leave.IsDraft = submitType == "draft" ? "Yes" : "No";
@@ -467,12 +521,13 @@ namespace Leave_Management_System.Controllers
                 Leave.JoinDate = model.JoinDate;            
                 Leave.UpdatedBy = model.EmpUserID;
                 Leave.UpdatedDatetime = DateTime.Now;
+                Leave.NoofLeaves = noofleaveuserneeds;
 
                 _db.Leave.Update(Leave);
 
                 await _db.SaveChangesAsync();
              
-                if (model.IsDraft == "No")
+                if (Leave.IsDraft == "No")
                 {  
                     //Insert Into Desired Flow
 
@@ -493,7 +548,9 @@ namespace Leave_Management_System.Controllers
                         return Json(new { success = false, message = firstLevelErrorMessage });
                     }
                 }
-               
+
+                _db.Users.Update(userleavedata);
+                await _db.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
@@ -781,6 +838,31 @@ namespace Leave_Management_System.Controllers
                 }
                 else
                 {
+                    //calculation Part 
+
+                    var Leave = await _db.Leave.FindAsync(LeaveId);
+
+                    if (Leave == null)
+
+                    return Json(new
+
+                        { success = false, message = "Data not found." }
+
+                    );
+
+                    var userleavedata = await _db.Users.FirstOrDefaultAsync(x => x.Id == Leave.EmpUserID);
+
+                    if (userleavedata == null)
+                    {
+                        return Json(new { success = false, message = "User Data not found." });
+                    }                
+                   
+                    userleavedata.UsedLeaves -= Leave.NoofLeaves;
+                    userleavedata.LeftLeaves += Leave.NoofLeaves;
+
+                    _db.Users.Update(userleavedata);
+                    await _db.SaveChangesAsync();
+
                     // Rejected, update leave status
                     observationFlow.Leave.Status = "Rejected";
                     _db.Leave.Update(observationFlow.Leave);
@@ -945,13 +1027,17 @@ namespace Leave_Management_System.Controllers
                     return Json(new { success = false, message = "User Data not found" });
                 }
 
-                userleavedata.UsedLeaves = userleavedata.UsedLeaves - Leave.NoofLeaves;
-                userleavedata.LeftLeaves = userleavedata.LeftLeaves + Leave.NoofLeaves;
+                if (Leave.Status != "Rejected")
+                {
+                    userleavedata.UsedLeaves = userleavedata.UsedLeaves - Leave.NoofLeaves;
+                    userleavedata.LeftLeaves = userleavedata.LeftLeaves + Leave.NoofLeaves;
 
-                _db.Users.Update(userleavedata);
+                    _db.Users.Update(userleavedata);
 
-                await _db.SaveChangesAsync();
+                    await _db.SaveChangesAsync();
 
+                }
+                
                 // Delete related LeaveObservationFlow records
                 var leaveObservationFlows = await _db.LeaveObservationFlow
                     .Where(x => x.LeaveId == decryptedId)

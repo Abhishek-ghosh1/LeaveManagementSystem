@@ -12,11 +12,27 @@
         </div>
 
         <div class="card-body">
-            <form id="createUserForm" asp-action="Create" method="post">
+            <form id="createUserForm" asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
 
                 <div class="form-group mb-3">
                     <label>Name</label>
                     <input asp-for="Name" class="form-control req" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Contact No</label>
+                    <input asp-for="ContactNo" class="form-control" type="tel" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Email</label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label>Address</label>
+                    <textarea asp-for="Address" class="form-control" rows="3"></textarea>
                 </div>
 
                 <div class="form-group mb-3">
@@ -62,6 +78,28 @@
                         <option value="INACTIVE">INACTIVE</option>
                     </select>
                 </div>
+             
+                <div class="form-group mb-3">
+                    <label>User Image</label>
+
+                    <div class="col-sm-8">
+
+                        <div class="custom-file">
+                            <input type="file" class="form-control-file" data-error="Please Upload Images." accept=".jpg,.jpeg,.png"
+                                   id="ProfilePic" name="ProfilePic">
+                            <label for="ProfilePic" class="custom-file-label" id="OrgfileLabel">Choose media...</label>
+                        </div>
+                        <span id="fileError" class="text-danger"></span>
+                        <div class="form-group col-md-12">
+                            <div id="ProfilePicPreview" class="mt-2 d-flex flex-wrap">
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">
+                            Allowed: Images (No videos).
+                        </small>
+                    </div>
+
+                </div>
 
                 <div class="form-group mt-4">
                     <button type="submit" class="btn btn-primary w-100">Create</button>
@@ -83,7 +121,10 @@
                    
             $('.select2').select2({
             width: '100%'
+
         });
+
+         setupFilePreview('#ProfilePic', '#ProfilePicPreview', '#fileError', 10, 10);
 
             $('#createUserForm').on('submit', function (e) {
                 e.preventDefault();
@@ -104,7 +145,7 @@
 
                 var form = this;
                 var formData = new FormData(form);
-
+             
                 $('#modal-loader').modal('show');
 
                 $.ajax({

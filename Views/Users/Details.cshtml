@@ -19,6 +19,57 @@
             </div>
 
             <div class="row mb-2">
+                <div class="col-md-3"><strong>Contact No</strong></div>
+                <div class="col-md-8">@Model.ContactNo</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Email</strong></div>
+                <div class="col-md-8">@Model.Email</div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-md-3"><strong>Address</strong></div>
+                <div class="col-md-8">@Model.Address</div>
+            </div>
+
+                    <div class="form-group row mb-3">
+                        <label class="col-sm-4 col-form-label required">
+                            Image
+                        </label>
+
+                        <div class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.Image))
+                            {
+                                var files = Model.Image
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+
+                                @if (files.Any())
+                                {
+                                    <div id="ExistingOrgFiles" class="d-flex flex-wrap justify-content-start gap-3 mb-2">
+                                        @foreach (var file in files)
+                                        {
+                                            <div class="flex-shrink-0 image-wrapper" data-file="@file">
+                                                @await Html.PartialAsync("_DocumentPreview", new DocumentPreviewViewModel
+                                                {
+                                                    FileName = file,
+                                                                        Path = $"~/uploads/Users/{file}"
+                                                                        })
+                                </div>
+                                                                }
+                                    </div>
+                                }
+
+                            }
+                            else
+                            {
+                                <span class="text-muted">No file uploaded</span>
+                            }
+                          
+                        </div>
+                    </div>
+            <div class="row mb-2">
                 <div class="col-md-3"><strong>User ID</strong></div>
                 <div class="col-md-8">@Model.PinNo</div>
             </div>

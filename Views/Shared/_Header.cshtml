@@ -1,4 +1,4 @@
-<!-- Navbar -->
++<!-- Navbar -->
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
@@ -13,6 +13,9 @@
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
+            <span class="nav-link" id="headerDateTime" style="font-weight: 500;"></span>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" data-widget="fullscreen" href="#" role="button">
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
@@ -22,10 +25,7 @@
                 <i class="fas fa-user-circle"></i> @(ViewBag.UserName ?? "User")
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
-                <li><a class="dropdown-item" href="#">
-                    <i class="fas fa-user"></i> Profile
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
+               
                 <li><a asp-controller="Account" asp-action="Logout" class="dropdown-item">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a></li>

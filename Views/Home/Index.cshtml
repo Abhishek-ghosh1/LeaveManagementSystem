@@ -4,138 +4,252 @@
 }
 
 <div class="container-fluid">
-    <!-- Info boxes -->
-    <div class="row">
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-                <span class="info-box-icon bg-info elevation-1"><i class="fas fa-users"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total Users</span>
-                    <span class="info-box-number">
-                        @Model.TotalUsers
-                        <small>users</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-                <span class="info-box-icon bg-info elevation-1">
-                    <i class="fas fa-calendar-alt"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total No. of Leave</span>
-                    <span class="info-box-number">
-                         @Model.TotalLeaves 
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-
-            <div class="col-12 col-md-6">
-            <div class="info-box">
-                <span class="info-box-icon bg-success elevation-1">
-                    <i class="fas fa-calendar-check"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total No. of Leave Used</span>
-                    <span class="info-box-number">
-                       @*  @Model.TotalLeavesUsed *@
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-            <div class="col-12 col-md-6">
-            <div class="info-box">
-                <span class="info-box-icon bg-warning elevation-1">
-                    <i class="fas fa-calendar-day"></i>
-                </span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total No. of Leave Left</span>
-                    <span class="info-box-number">
-                       @*  @Model.TotalLeavesLeft *@
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-calendar-check"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Approved Leaves</span>
-                    <span class="info-box-number">
-                        @Model.ApprovedLeaves
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-                <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Pending Leaves</span>
-                    <span class="info-box-number">
-                        @Model.PendingLeaves
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-md-3">
-            <div class="info-box">
-                <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-calendar-times"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Rejected Leaves</span>
-                    <span class="info-box-number">
-                        @Model.RejectedLeaves
-                        <small>leaves</small>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Welcome Message -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Welcome to Leave Management System</h3>
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Welcome to Leave Management System</h4>
         </div>
         <div class="card-body">
-            <p>Hello <strong>@Model.UserName</strong>! Welcome to the Leave Management System.</p>
-            <p>Use the sidebar navigation to manage users and leave requests.</p>
+            <h5>Hello <strong>@Model.UserName</strong>!</h5>
+            <p class="mb-0">Use the sidebar navigation to manage users and leave requests.</p>
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Recent Activity</h3>
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Left Column: Info Boxes -->
+        <div class="col-lg-8">
+            <!-- Info Boxes Row 1 -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-2x text-info mb-2"></i>
+                            <h6 class="text-muted">Total Users</h6>
+                            <h3 class="mb-0">@Model.TotalUsers</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-alt fa-2x text-info mb-2"></i>
+                            <h6 class="text-muted">Total Leave Days</h6>
+                            <h3 class="mb-0">@Model.TotalLeaves</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                            <h6 class="text-muted">Leave Days Used</h6>
+                            <h3 class="mb-0">@Model.TotalLeavesUsed</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Boxes Row 2 -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-calendar-day fa-2x text-warning mb-2"></i>
+                            <h6 class="text-muted">Leave Days Left</h6>
+                            <h3 class="mb-0">@Model.LeavesLeft</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h6 class="text-muted">Approved Leaves</h6>
+                            <h3 class="mb-0">@Model.ApprovedLeaves</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                            <h6 class="text-muted">Pending Leaves</h6>
+                            <h3 class="mb-0">@Model.PendingLeavesForApproval</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rejected Leaves -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-body text-center">
+                            <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                            <h6 class="text-muted">Rejected Leaves</h6>
+                            <h3 class="mb-0">@Model.RejectedLeaves</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">Leave Status</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="leaveStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">Leave Types</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="leaveTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">Leave Balance</h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="leaveBalanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th style="width: 30%">Employee</th>
-                        <th style="width: 30%">Leave Type</th>
-                        <th style="width: 20%">Status</th>
-                        <th style="width: 20%">Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    
-                </tbody>
-            </table>
+
+        <!-- Right Column: Calendar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Calendar</h5>
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-      
+
+@section Scripts {
+    <script>
+        // Leave Status Pie Chart
+        const leaveStatusCtx = document.getElementById('leaveStatusChart').getContext('2d');
+        new Chart(leaveStatusCtx, {
+            type: 'pie',
+            data: {
+                labels: @Json.Serialize(Model.LeaveStatusLabels),
+                datasets: [{
+                    data: @Json.Serialize(Model.LeaveStatusData),
+                    backgroundColor: [
+                        '#28a745', // Green for Approved
+                        '#dc3545', // Red for Rejected
+                        '#ffc107'  // Yellow for Pending
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Leave Types Bar Chart
+        const leaveTypeCtx = document.getElementById('leaveTypeChart').getContext('2d');
+        new Chart(leaveTypeCtx, {
+            type: 'bar',
+            data: {
+                labels: @Json.Serialize(Model.LeaveTypeLabels),
+                datasets: [{
+                    label: 'Number of Leaves',
+                    data: @Json.Serialize(Model.LeaveTypeData),
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Leave Balance Doughnut Chart
+        const leaveBalanceCtx = document.getElementById('leaveBalanceChart').getContext('2d');
+        new Chart(leaveBalanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @Json.Serialize(Model.LeaveBalanceLabels),
+                datasets: [{
+                    data: @Json.Serialize(Model.LeaveBalanceData),
+                    backgroundColor: [
+                        '#17a2b8', // Cyan for Total
+                        '#fd7e14', // Orange for Used
+                        '#6f42c1'  // Purple for Remaining
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        // Initialize FullCalendar
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth'
+                },
+                height: 'auto',
+                events: @Json.Serialize(Model.CalendarEvents)
+            });
+            calendar.render();
+        });
+
+    </script>
+
+}
+
 

@@ -11,7 +11,8 @@
             <h4 class="m-0 text-white">Edit User</h4>
         </div>
         <div class="card-body">
-            <form id="editUserForm" asp-action="Edit" method="post">
+            <form id="editUserForm" asp-action="Edit" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
 
                 <!-- Hidden ID -->
                 <input type="hidden" asp-for="Id" value="@Model.Id" />
@@ -19,6 +20,21 @@
                 <div class="form-group">
                     <label>Name</label>
                     <input asp-for="Name" class="form-control req" />
+                </div>
+
+                <div class="form-group">
+                    <label>Contact No</label>
+                    <input asp-for="ContactNo" class="form-control" type="tel" />
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea asp-for="Address" class="form-control" rows="3"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -60,6 +76,58 @@
                     </select>
                 </div>
 
+
+                <div class="form-group row mb-3">
+                    <label class="col-sm-4 col-form-label required">
+                        Image
+                    </label>
+
+                    <div class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(Model.Image))
+                        {
+                            var files = Model.Image
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
+
+                            @if (files.Any())
+                            {
+                                <div id="ExistingOrgFiles" class="d-flex flex-wrap justify-content-start gap-3 mb-2">
+                                    @foreach (var file in files)
+                                    {
+                                        <div class="flex-shrink-0 image-wrapper" data-file="@file">
+                                            @await Html.PartialAsync("_DocumentPreview", new DocumentPreviewViewModel
+                                            {
+                                                FileName = file,
+                                                                Path = $"~/uploads/Users/{file}"
+                                                                })
+                            </div>
+                                                        }
+                                </div>
+                            }
+
+                        }
+                        else
+                        {
+                            <span class="text-muted">No file uploaded</span>
+                        }
+                        <div class="custom-file">
+                            <input type="file" class="form-control-file" data-error="Please Upload Images." accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.txt"
+                                   id="ProfilePicFile" name="ProfilePicFile">
+                            <label for="ProfilePicFile" class="custom-file-label" id="ProfilePicFilefileLabel">Choose media...</label>
+                        </div>
+                        <span id="fileError" class="text-danger"></span>
+                        <div class="form-group col-md-12">
+                            <div id="ProfilePicFilePreview" class="mt-2 d-flex flex-wrap">
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">
+                            Allowed: Images only.
+                        </small>
+
+
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
                 </div>
@@ -83,6 +151,7 @@
             width: '100%'
         });
 
+          setupFilePreview('#ProfilePicFile', '#ProfilePicFilePreview', '#fileError', 10, 10);
 
             $('#editUserForm').on('submit', function (e) {
                 e.preventDefault();
@@ -102,7 +171,7 @@
 
                 var form = this;
                 var formData = new FormData(form);
-
+             
                 $('#modal-loader').modal('show');
 
                 $.ajax({

@@ -89,9 +89,9 @@
                 render: function (data) {
                     let badgeClass = 'bg-secondary';
 
-                    if (data === 'ACTIVE') badgeClass = 'bg-success';
-                    else if (data === 'REJECTED') badgeClass = 'bg-danger';
-                    else if (data === 'PENDING') badgeClass = 'bg-warning';
+                    if (data === 'Approved') badgeClass = 'bg-success';
+                    else if (data === 'Rejected') badgeClass = 'bg-danger';
+                    else if (data === 'ACTIVE') badgeClass = 'bg-warning';
 
                     return `<span class="badge ${badgeClass}">${data}</span>`;
                 }
