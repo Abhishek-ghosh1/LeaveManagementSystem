@@ -13,7 +13,7 @@
                 <i class="fas fa-user-circle img-circle elevation-2" style="font-size: 34px; color: white;"></i>
             </div>
             <div class="info">
-                <a href="#" class="d-block text-white">@ViewBag.UserName</a>
+                <a href="#" class="d-block text-white">@ViewBag.UserName (@ViewBag.UserRole)</a>
             </div>
         </div>
 
@@ -22,15 +22,15 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <!-- Dashboard -->
                 <li class="nav-item">
-                    <a asp-controller="Home" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                    <a asp-controller="Home" asp-action="Index" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
-                 <!-- Role Menu -->
+               
                 <li class="nav-item">
-                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RoleMaster" ? "active" : "")">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-shield-alt"></i>
                         <p>
                             Roles
@@ -49,13 +49,12 @@
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Add Roles</p>
                             </a>
-                        </li>
+                        </li>                      
                     </ul>
                 </li>
-
-                <!-- Team_Project Menu -->
+                
                 <li class="nav-item">
-                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Team_Project" ? "active" : "")">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-project-diagram"></i>
                         <p>
                             Team/Project
@@ -76,11 +75,12 @@
                             </a>
                         </li>
                     </ul>
-                </li>            
+                </li>
+                
 
-                <!-- Leave Menu -->
+              
                 <li class="nav-item">
-                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "LeaveMaster" ? "active" : "")">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-clipboard-list"></i>
                         <p>
                             Leave Reasons
@@ -103,9 +103,8 @@
                     </ul>
                 </li>
                 
-                <!-- Users Menu -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-users"></i>
                         <p>
                             Users
@@ -127,10 +126,10 @@
                         </li>
                     </ul>
                 </li>
-
+                
                 <!-- Leave Menu -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Leave" ? "active" : "")">
+                    <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-calendar-alt"></i>
                         <p>
                             Leave Options
@@ -153,9 +152,8 @@
                     </ul>
                 </li>
 
-                <!-- Reports -->
                 <li class="nav-item">
-                    <a asp-controller="Report" asp-action="Index" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Report" ? "active" : "")">
+                    <a asp-controller="Report" asp-action="Index" class="nav-link">
                         <i class="nav-icon fas fa-chart-bar"></i>
                         <p>Report</p>
                     </a>

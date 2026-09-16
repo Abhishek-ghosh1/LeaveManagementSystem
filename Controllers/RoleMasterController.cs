@@ -10,14 +10,13 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
     [Authorize]
 
     public class RoleMasterController : BaseController
     {
         private readonly ApplicationDbContext _db;
 
-        public RoleMasterController(ApplicationDbContext db)
+        public RoleMasterController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }

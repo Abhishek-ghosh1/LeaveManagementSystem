@@ -1,3 +1,4 @@
+@model Leave_Management_System.Models.ReportViewModel
 @{
     ViewData["Title"] = "Leave Reports";
 }
@@ -37,6 +38,7 @@
                             <th>Reference No</th>
                             <th>Employee Name</th>
                             <th>Leave Reason</th>
+                            <th>Leave Date</th>
                             <th>Start Date</th>
                             <th>Join Date</th>
                             <th>No. of Days</th>
@@ -45,50 +47,59 @@
                             <th>Created Date</th>
                         </tr>
                     </thead>
-                   @*  <tbody>
+                    <tbody>
                         @if (Model.LeaveReports != null && Model.LeaveReports.Any())
                         {
-                            @foreach (var (item, index) in Model.LeaveReports.Select((x, i) => (x, i)))
                             {
-                                <tr>
-                                    <td>@(index + 1)</td>
-                                    <td>@item.ReferenceNo</td>
-                                    <td>@item.EmployeeName</td>
-                                    <td>@item.LeaveReason</td>
-                                    <td>@item.StartDate.ToString("dd-MMM-yyyy")</td>
-                                    <td>@item.JoinDate.ToString("dd-MMM-yyyy")</td>
-                                    <td>@item.NoofLeaves</td>
-                                    <td>
-                                        @if (item.Status == "Approved")
-                                        {
-                                            <span class="badge bg-success">@item.Status</span>
-                                        }
-                                        else if (item.Status == "Rejected")
-                                        {
-                                            <span class="badge bg-danger">@item.Status</span>
-                                        }
-                                        else if (item.Status == "ACTIVE" || item.Status == "Pending")
-                                        {
-                                            <span class="badge bg-warning">@item.Status</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">@item.Status</span>
-                                        }
-                                    </td>
-                                    <td>@item.CreatedBy</td>
-                                    <td>@item.CreatedDatetime.ToString("dd-MMM-yyyy hh:mm tt")</td>
-                                </tr>
+                                int index = 0;
+                                foreach (var item in Model.LeaveReports)
+                                {
+                                    <tr>
+                                        <td>@(index + 1)</td>
+                                        <td>
+                                            <a asp-action="Details" asp-controller="Leave" asp-route-id="@item.EncryptedId" class="text-decoration-none">
+                                                @item.ReferenceNo
+                                            </a>
+                                        </td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.LeaveReason</td>
+                                        <td>@item.LeaveDate.ToString("dd-MMM-yyyy")</td>
+                                        <td>@item.StartDate.ToString("dd-MMM-yyyy")</td>
+                                        <td>@item.JoinDate.ToString("dd-MMM-yyyy")</td>
+                                        <td>@item.NoofLeaves</td>
+                                        <td>
+                                            @if (item.Status == "Approved")
+                                            {
+                                                <span class="badge bg-success">@item.Status</span>
+                                            }
+                                            else if (item.Status == "Rejected")
+                                            {
+                                                <span class="badge bg-danger">@item.Status</span>
+                                            }
+                                            else if (item.Status == "ACTIVE" || item.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">@item.Status</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@item.Status</span>
+                                            }
+                                        </td>
+                                        <td>@item.CreatedBy</td>
+                                        <td>@item.CreatedDatetime.ToString("dd-MMM-yyyy hh:mm tt")</td>
+                                    </tr>
+                                    index++;
+                                }
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="10" class="text-center">No records found for the selected period.</td>
+                                <td colspan="11" class="text-center">No records found for the selected period.</td>
                             </tr>
                         }
         
-                    </tbody> *@
+                    </tbody>
                 </table>
             </div>
         </div>

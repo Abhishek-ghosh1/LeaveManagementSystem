@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
+   
     [Authorize]
 
     public class UsersController : BaseController
@@ -23,7 +23,7 @@ namespace Leave_Management_System.Controllers
         
         private readonly PasswordHasher<Users> _passwordHasher;
 
-        public UsersController(ApplicationDbContext db)
+        public UsersController(ApplicationDbContext db) : base(db)
         {
             _db = db;
             _passwordHasher = new PasswordHasher<Users>();

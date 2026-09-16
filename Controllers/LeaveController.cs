@@ -14,12 +14,11 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
     [Authorize]
     public class LeaveController : BaseController
     {
         private readonly ApplicationDbContext _db;
-        public LeaveController(ApplicationDbContext db)
+        public LeaveController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
@@ -146,14 +145,32 @@ namespace Leave_Management_System.Controllers
         public IActionResult Create()
         {
             var model = new Leave();
+            var userRole = User.FindFirstValue(ClaimTypes.Role);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            model.Employees = _db.Users
-                .Select(u => new SelectListItem
-                {
-                    Value = u.Id.ToString(),
-                    Text = u.Name
-                })
-                .ToList();
+            // Employees can only create leaves for themselves
+            if (userRole == "Employee")
+            {
+                model.Employees = _db.Users
+                    .Where(u => u.Id.ToString() == userId)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id.ToString(),
+                        Text = u.Name
+                    })
+                    .ToList();
+            }
+            else
+            {
+                // Admins, Managers, HR can create leaves for any user
+                model.Employees = _db.Users
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.Id.ToString(),
+                        Text = u.Name
+                    })
+                    .ToList();
+            }
 
             model.LeaveReasons = _db.LeaveMaster
                .Select(u => new SelectListItem
@@ -368,7 +385,7 @@ namespace Leave_Management_System.Controllers
             {
                 return NotFound();
             }
-
+        
             ViewBag.DecryptedId = decryptedId;
 
             // ✅ Bind dropdown to SAME model

@@ -259,6 +259,50 @@ namespace Leave_Management_System.Migrations
                     b.ToTable("LeaveObservationFlow");
                 });
 
+            modelBuilder.Entity("Leave_Management_System.Models.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDatetime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDatetime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permission");
+                });
+
             modelBuilder.Entity("Leave_Management_System.Models.RoleMaster", b =>
                 {
                     b.Property<int>("Id")
@@ -290,6 +334,45 @@ namespace Leave_Management_System.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RoleMaster");
+                });
+
+            modelBuilder.Entity("Leave_Management_System.Models.RolePermission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDatetime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDatetime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RolePermission");
                 });
 
             modelBuilder.Entity("Leave_Management_System.Models.Team_Project", b =>
@@ -487,6 +570,25 @@ namespace Leave_Management_System.Migrations
                     b.Navigation("Users");
                 });
 
+            modelBuilder.Entity("Leave_Management_System.Models.RolePermission", b =>
+                {
+                    b.HasOne("Leave_Management_System.Models.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Leave_Management_System.Models.RoleMaster", "RoleMaster")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("RoleMaster");
+                });
+
             modelBuilder.Entity("Leave_Management_System.Models.Users", b =>
                 {
                     b.HasOne("Leave_Management_System.Models.RoleMaster", "RoleMaster")
@@ -496,6 +598,11 @@ namespace Leave_Management_System.Migrations
                         .IsRequired();
 
                     b.Navigation("RoleMaster");
+                });
+
+            modelBuilder.Entity("Leave_Management_System.Models.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
                 });
 
             modelBuilder.Entity("Leave_Management_System.Models.RoleMaster", b =>

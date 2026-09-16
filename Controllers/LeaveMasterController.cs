@@ -14,14 +14,13 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
     [Authorize]
 
     public class LeaveMasterController : BaseController
     {
         private readonly ApplicationDbContext _db;
 
-        public LeaveMasterController(ApplicationDbContext db)
+        public LeaveMasterController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }

@@ -15,7 +15,7 @@ namespace Leave_Management_System.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _db;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext db)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext db) : base(db)
         {
             _logger = logger;
             _db = db;

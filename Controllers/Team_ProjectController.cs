@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
+  
     [Authorize]
 
     public class Team_ProjectController : BaseController
     {
         private readonly ApplicationDbContext _db;
 
-        public Team_ProjectController(ApplicationDbContext db)
+        public Team_ProjectController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }

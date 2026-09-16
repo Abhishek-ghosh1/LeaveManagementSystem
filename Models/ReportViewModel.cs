@@ -17,9 +17,11 @@ namespace Leave_Management_System.Models
     public class LeaveReportItem
     {
         public int Id { get; set; }
+        public string EncryptedId { get; set; }
         public string ReferenceNo { get; set; }
         public string EmployeeName { get; set; }
         public string LeaveReason { get; set; }
+        public DateTime LeaveDate { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime JoinDate { get; set; }
         public int NoofLeaves { get; set; }

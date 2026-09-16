@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace Leave_Management_System.Controllers
 {
-    //[SessionAuth]
     [Authorize]
 
     public class LeaveMatrixController : BaseController
@@ -19,7 +18,7 @@ namespace Leave_Management_System.Controllers
 
         private readonly ApplicationDbContext _db;
 
-        public LeaveMatrixController(ApplicationDbContext db)
+        public LeaveMatrixController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }

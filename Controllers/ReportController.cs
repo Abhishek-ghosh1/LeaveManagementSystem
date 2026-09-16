@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text;
 
 namespace Leave_Management_System.Controllers
 {
@@ -12,7 +13,7 @@ namespace Leave_Management_System.Controllers
     {
         private readonly ApplicationDbContext _db;
 
-        public ReportController(ApplicationDbContext db)
+        public ReportController(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
@@ -58,22 +59,46 @@ namespace Leave_Management_System.Controllers
 
             var leaves = leaveQuery.OrderByDescending(l => l.StartDate).ToList();
 
-            // Map to report items
-            viewModel.LeaveReports = leaves.Select(l => new LeaveReportItem
+            // Map to report items - expand each leave into individual day records
+            var dayWiseReports = new List<LeaveReportItem>();
+            
+            foreach (var leave in leaves)
             {
-                Id = l.Id,
-                ReferenceNo = l.ReferenceNo,
-                EmployeeName = l.Employee?.Name ?? "Unknown",
-                LeaveReason = l.LeaveMaster?.LeaveName ?? "Unknown",
-                StartDate = l.StartDate,
-                JoinDate = l.JoinDate,
-                NoofLeaves = l.NoofLeaves,
-                Status = l.Status,
-                CreatedBy = _db.Users.FirstOrDefault(u => u.Id == l.CreatedBy)?.Name ?? "Unknown",
-                CreatedDatetime = l.CreatedDatetime
-            }).ToList();
+                // Generate a row for each day of the leave
+                for (int day = 0; day < leave.NoofLeaves; day++)
+                {
+                    var currentLeaveDate = leave.StartDate.AddDays(day);
+                    
+                    dayWiseReports.Add(new LeaveReportItem
+                    {
+                        Id = leave.Id,
+                        EncryptedId = EncryptString(leave.Id.ToString()),
+                        ReferenceNo = leave.ReferenceNo,
+                        EmployeeName = leave.Employee?.Name ?? "Unknown",
+                        LeaveReason = leave.LeaveMaster?.LeaveName ?? "Unknown",
+                        LeaveDate = currentLeaveDate,
+                        StartDate = leave.StartDate,
+                        JoinDate = leave.JoinDate,
+                        NoofLeaves = leave.NoofLeaves,
+                        Status = leave.Status,
+                        CreatedBy = _db.Users.FirstOrDefault(u => u.Id == leave.CreatedBy)?.Name ?? "Unknown",
+                        CreatedDatetime = leave.CreatedDatetime
+                    });
+                }
+            }
+            
+            viewModel.LeaveReports = dayWiseReports.OrderBy(r => r.LeaveDate).ToList();
            
             return View(viewModel);
+        }
+
+        private static string EncryptString(string plainText)
+        {
+            if (string.IsNullOrEmpty(plainText))
+                return plainText;
+
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(plainBytes);
         }
     }
 }

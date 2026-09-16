@@ -22,7 +22,15 @@
         </li>
         <li class="nav-item dropdown">
             <a class="nav-link" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-user-circle"></i> @(ViewBag.UserName ?? "User")
+                @if (!string.IsNullOrEmpty(ViewBag.UserProfilePic))
+                {
+                    <img src="~/uploads/Users/@ViewBag.UserProfilePic" alt="Profile" class="img-circle" style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;" />
+                }
+                else
+                {
+                    <i class="fas fa-user-circle"></i>
+                }
+                @(ViewBag.UserName ?? "User")
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                

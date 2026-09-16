@@ -17,7 +17,7 @@ namespace Leave_Management_System.Controllers
 
         private readonly PasswordHasher<Users> _passwordHasher;
 
-        public AccountController(ApplicationDbContext db)
+        public AccountController(ApplicationDbContext db) : base(db)
         {
             _db = db;
             _passwordHasher = new PasswordHasher<Users>();
@@ -76,12 +76,10 @@ namespace Leave_Management_System.Controllers
             return View(model);
         }
 
-        //public IActionResult Logout()
         public async Task<IActionResult> Logout()
         {
             // HttpContext.Session.Clear();
-            await HttpContext.SignOutAsync(
-        CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync( CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToAction("Login");
         }

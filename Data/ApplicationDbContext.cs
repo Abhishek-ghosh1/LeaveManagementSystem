@@ -26,6 +26,7 @@ namespace Leave_Management_System.Data
 
         public DbSet<LeaveObservationFlow> LeaveObservationFlow { get; set; }
 
+       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LeaveObservationFlow>()
@@ -51,7 +52,7 @@ namespace Leave_Management_System.Data
                 .HasOne(l => l.RoleMaster)
                 .WithMany()
                 .HasForeignKey(l => l.ToRole)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);         
         }
     }
 }
