@@ -1,4 +1,4 @@
-﻿using Leave_Management_System.Data;
+using Leave_Management_System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
