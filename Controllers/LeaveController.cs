@@ -148,9 +148,7 @@ namespace Leave_Management_System.Controllers
             var userRole = User.FindFirstValue(ClaimTypes.Role);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Employees can only create leaves for themselves
-            if (userRole == "Employee")
-            {
+            
                 model.Employees = _db.Users
                     .Where(u => u.Id.ToString() == userId)
                     .Select(u => new SelectListItem
@@ -159,18 +157,7 @@ namespace Leave_Management_System.Controllers
                         Text = u.Name
                     })
                     .ToList();
-            }
-            else
-            {
-                // Admins, Managers, HR can create leaves for any user
-                model.Employees = _db.Users
-                    .Select(u => new SelectListItem
-                    {
-                        Value = u.Id.ToString(),
-                        Text = u.Name
-                    })
-                    .ToList();
-            }
+           
 
             model.LeaveReasons = _db.LeaveMaster
                .Select(u => new SelectListItem
